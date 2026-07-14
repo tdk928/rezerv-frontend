@@ -6,3 +6,4 @@
 
 | # | Бранч | Обобщение |
 |---|-------|-----------|
+| 1 | feature/auth-login-registration | Scaffold (React 19 + Vite + TS strict + Tailwind v4 + TanStack Query + RHF/zod + Vitest) + login/registration страници срещу rezerv-cas през gateway (Vite proxy /api→:8080), auth context (token само в паметта), /status страница (черен екран логнат/не логнат), 15 unit теста. Refresh flow още няма. |

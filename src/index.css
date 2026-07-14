@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+
+/* Работна палитра (REZERV.md §5.2) — финалните цветове ще дойдат от собственика. */
+@theme {
+  --color-brand: #e11d48;
+  --color-brand-hover: #be123c;
+  --color-brand-soft: #fff1f2;
+
+  --color-ink: #1c1917;
+  --color-ink-secondary: #57534e;
+  --color-ink-muted: #a8a29e;
+
+  --color-surface: #fafaf9;
+  --color-card: #ffffff;
+  --color-line: #e7e5e4;
+
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+}
+
+body {
+  @apply bg-surface text-ink antialiased;
+}
