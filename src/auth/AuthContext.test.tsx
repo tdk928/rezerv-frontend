@@ -73,13 +73,13 @@ describe('AuthContext — session persistence', () => {
     expect(authApi.refresh).toHaveBeenCalledTimes(1)
 
     // Клик веднага след login-а НЕ рефрешва (throttle 60 сек).
-    await userEvent.click(screen.getByAltText('REZERV — резервирай своя час'))
+    await userEvent.click(screen.getByText('Запази час за минути'))
     expect(authApi.refresh).toHaveBeenCalledTimes(1)
 
     // Клик 2 минути по-късно рефрешва с текущия (ротиран) token.
     const realNow = Date.now()
     vi.spyOn(Date, 'now').mockReturnValue(realNow + 2 * 60_000)
-    await userEvent.click(screen.getByAltText('REZERV — резервирай своя час'))
+    await userEvent.click(screen.getByText('Запази час за минути'))
 
     await waitFor(() => {
       expect(authApi.refresh).toHaveBeenCalledTimes(2)

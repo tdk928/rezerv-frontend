@@ -25,13 +25,20 @@ export async function post<TResponse>(path: string, body: unknown): Promise<TRes
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
+  return handle<TResponse>(response)
+}
 
+export async function get<TResponse>(path: string): Promise<TResponse> {
+  const response = await fetch(`/api${path}`)
+  return handle<TResponse>(response)
+}
+
+async function handle<TResponse>(response: Response): Promise<TResponse> {
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null
     throw errorBody?.code
       ? new ApiError(errorBody)
       : new Error(`Неочаквана грешка (HTTP ${response.status})`)
   }
-
   return (await response.json()) as TResponse
 }
