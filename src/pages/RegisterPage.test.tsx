@@ -1,18 +1,14 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderWithProviders } from '../test/renderWithProviders'
-import { RegisterPage } from './RegisterPage'
+import { renderApp } from '../test/renderApp'
+import { makeAuthResponse } from '../test/fixtures'
 import { ApiError } from '../api/http'
 import * as authApi from '../api/auth'
-import type { AuthResponse } from '../api/auth'
 
 vi.mock('../api/auth', { spy: true })
 
-const authResponse: AuthResponse = {
-  accessToken: 'jwt-token',
-  refreshToken: 'refresh-uuid',
-  expiresInSeconds: 900,
+const authResponse = makeAuthResponse({
   user: {
     id: 2,
     email: 'maria@example.bg',
@@ -24,7 +20,7 @@ const authResponse: AuthResponse = {
     roles: ['CLIENT'],
     createdAt: '2026-07-14T10:00:00Z',
   },
-}
+})
 
 async function fillForm() {
   await userEvent.type(screen.getByLabelText('Име'), 'Мария')
@@ -35,11 +31,12 @@ async function fillForm() {
 
 describe('RegisterPage', () => {
   beforeEach(() => {
-    vi.restoreAllMocks()
+    vi.clearAllMocks()
+    sessionStorage.clear()
   })
 
   it('показва валидационни грешки при празна форма', async () => {
-    renderWithProviders(<RegisterPage />, { path: '/register' })
+    renderApp('/register')
 
     await userEvent.click(screen.getByRole('button', { name: 'Регистрирай се' }))
 
@@ -50,18 +47,17 @@ describe('RegisterPage', () => {
     expect(authApi.register).not.toHaveBeenCalled()
   })
 
-  it('при успешна регистрация редиректва към /status; празен телефон не се праща', async () => {
+  it('при успешна регистрация редиректва към /; празен телефон не се праща', async () => {
     vi.mocked(authApi.register).mockResolvedValue(authResponse)
-    renderWithProviders(<RegisterPage />, { path: '/register' })
+    renderApp('/register')
 
     await fillForm()
     await userEvent.click(screen.getByRole('button', { name: 'Регистрирай се' }))
 
     await waitFor(() => {
-      expect(
-        screen.getByText('Логнат си като Мария Петрова (maria@example.bg)'),
-      ).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Изход' })).toBeInTheDocument()
     })
+    expect(screen.getByText('Мария Петрова')).toBeInTheDocument()
     expect(authApi.register).toHaveBeenCalledWith({
       email: 'maria@example.bg',
       password: 'secret123',
@@ -81,7 +77,7 @@ describe('RegisterPage', () => {
         timestamp: '2026-07-14T10:00:00Z',
       }),
     )
-    renderWithProviders(<RegisterPage />, { path: '/register' })
+    renderApp('/register')
 
     await fillForm()
     await userEvent.click(screen.getByRole('button', { name: 'Регистрирай се' }))

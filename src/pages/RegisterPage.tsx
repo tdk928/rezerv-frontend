@@ -30,7 +30,7 @@ export function RegisterPage() {
       }),
     onSuccess: (auth) => {
       setSession(auth)
-      navigate('/status')
+      navigate('/')
     },
   })
 

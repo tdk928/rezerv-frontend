@@ -23,7 +23,7 @@ export function LoginPage() {
     mutationFn: login,
     onSuccess: (auth) => {
       setSession(auth)
-      navigate('/status')
+      navigate('/')
     },
   })
 

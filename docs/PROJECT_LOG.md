@@ -6,4 +6,5 @@
 
 | # | Бранч | Обобщение |
 |---|-------|-----------|
+| 2 | feature/session-persistence-dark-ui | Session persistence (refresh token в sessionStorage + restore при reload) и sliding session (+15 мин на клик, throttle 1/мин); logout; нова ТЪМНА тема (черен фон + gradient blue→violet→pink→orange, utilities text-gradient/bg-gradient-brand); sticky Navbar (Rezerv лого → /, Вход/Регистрация/Изход); HomePage на "/" с AI hero снимка; login/register редиректват към "/". 19 unit теста. |
 | 1 | feature/auth-login-registration | Scaffold (React 19 + Vite + TS strict + Tailwind v4 + TanStack Query + RHF/zod + Vitest) + login/registration страници срещу rezerv-cas през gateway (Vite proxy /api→:8080), auth context (token само в паметта), /status страница (черен екран логнат/не логнат), 15 unit теста. Refresh flow още няма. |

@@ -1,23 +1,29 @@
 ---
-description: Дизайн система за rezerv-frontend (REZERV.md §5.2)
+description: Дизайн система за rezerv-frontend (тъмна тема, зададена от собственика)
 alwaysApply: true
 ---
 
-# Дизайн система
+# Дизайн система — тъмна тема с преливащи gradient акценти
 
-Работна палитра (Tailwind v4 theme токени в `src/index.css`; финалните цветове ще дойдат
-от собственика — тогава се обновяват там и в REZERV.md):
+Темата е ТЪМНА: черен фон + gradient текст/акценти (синьо → лилаво → розово → оранжево).
+Токените са в `src/index.css` (`@theme`):
 
-- Brand: rose `#e11d48`, hover `#be123c`, светъл фон `#fff1f2`
-- Текст (ink): `#1c1917` / secondary `#57534e` / muted `#a8a29e`
-- Фон: `#fafaf9`; карти: `#ffffff`; бордер: `#e7e5e4`
-- Статуси: success `#059669`, warning `#d97706`, danger `#dc2626`
+- Фон surface `#000000`; карти card `#101014`; бордер line `#27272e`
+- Текст ink `#f4f4f5` / secondary `#a1a1aa` / muted `#63636e`
+- Brand (плътен) violet `#a855f7`, hover `#9333ea`, soft фон `#1b1226`
+- Gradient стопове: blue `#3b82f6` → violet `#a855f7` → pink `#ec4899` → orange `#f97316`
+- Статуси: success `#34d399`, warning `#fbbf24`, danger `#ef4444`
+
+Utilities (дефинирани в `index.css`):
+
+- `text-gradient` — преливащ текст (лого „Rezerv", заглавия/акценти)
+- `bg-gradient-brand` — преливащ фон (primary бутони)
 
 Правила:
 
-- Карти: `rounded-2xl`, меки сенки. Бутони: `rounded-lg`.
-- Без тъмна тема за MVP.
-- Използвай общия `Button` компонент (variants: primary/secondary/ghost/danger) —
-  не пиши ad-hoc бутони.
+- ВСИЧКО е responsive — mobile-first, десктоп с `sm:`/`md:`/`lg:` breakpoints.
+- Карти: `rounded-2xl` с `border border-line`. Бутони: `rounded-lg`.
+- Използвай общия `Button` компонент (primary/secondary/ghost/danger) — не пиши ad-hoc бутони.
 - Loading: skeleton loaders, не голи спинъри.
 - Цветовете се реферират през theme токените, не с хардкоднати hex стойности в className.
+- Навигация: sticky Navbar (лого „Rezerv" вляво → `/`; вдясно Вход/Регистрация или Изход).

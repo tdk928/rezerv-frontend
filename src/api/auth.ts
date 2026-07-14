@@ -41,3 +41,8 @@ export function login(request: LoginRequest): Promise<AuthResponse> {
 export function register(request: RegisterRequest): Promise<AuthResponse> {
   return post<AuthResponse>('/auth/register', request)
 }
+
+/** Rotation: старият refresh token се инвалидира, връща се нов + нов access token (15 мин). */
+export function refresh(request: { refreshToken: string }): Promise<AuthResponse> {
+  return post<AuthResponse>('/auth/refresh', request)
+}
