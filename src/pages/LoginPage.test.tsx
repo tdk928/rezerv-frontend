@@ -35,7 +35,7 @@ describe('LoginPage', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Изход' })).toBeInTheDocument()
     })
-    expect(screen.getByAltText('REZERV — резервирай своя час')).toBeInTheDocument()
+    expect(screen.getByText('Запази час за минути')).toBeInTheDocument()
     expect(authApi.login).toHaveBeenCalledWith(
       { email: 'ivan@example.bg', password: 'secret123' },
       expect.anything(),
