@@ -1,0 +1,22 @@
+---
+description: Прави само това, което е изрично поискано — без самоволни разширения
+alwaysApply: true
+---
+
+# Scope discipline
+
+- НЕ създавай API извиквания, страници, компоненти или функционалност, които не са
+  изрично поискани. Пример: ако е поискан login, НЕ добавяй автоматично
+  forgot-password, logout-everywhere, профилна страница и т.н.
+- Същото важи за бекенда: ако се обсъжда ендпойнт за create-user, не предлагай/имплементирай
+  get-user/delete-user без изрична заявка.
+- Не добавяй "за всеки случай" abstractions, флагове или конфигурации.
+- Ако смяташ, че нещо липсва — предложи го накратко НАКРАЯ, но не го имплементирай.
+
+# Модерен стек, без legacy
+
+- Използвай само актуалните възможности на технологиите: React 19 (function components,
+  hooks; без class components, без legacy context, без PropTypes), Vite, TypeScript strict,
+  Tailwind CSS v4 (CSS-first конфигурация с `@theme`, без tailwind.config.js освен при нужда).
+- Без остарели библиотеки/подходи (moment.js, enzyme, create-react-app, Redux за server state и т.н.).
+- За бекенд контекст (Java): records за DTO-та навсякъде; Lombok САМО за JPA entities.

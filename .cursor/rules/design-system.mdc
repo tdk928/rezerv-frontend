@@ -1,0 +1,23 @@
+---
+description: Дизайн система за rezerv-frontend (REZERV.md §5.2)
+alwaysApply: true
+---
+
+# Дизайн система
+
+Работна палитра (Tailwind v4 theme токени в `src/index.css`; финалните цветове ще дойдат
+от собственика — тогава се обновяват там и в REZERV.md):
+
+- Brand: rose `#e11d48`, hover `#be123c`, светъл фон `#fff1f2`
+- Текст (ink): `#1c1917` / secondary `#57534e` / muted `#a8a29e`
+- Фон: `#fafaf9`; карти: `#ffffff`; бордер: `#e7e5e4`
+- Статуси: success `#059669`, warning `#d97706`, danger `#dc2626`
+
+Правила:
+
+- Карти: `rounded-2xl`, меки сенки. Бутони: `rounded-lg`.
+- Без тъмна тема за MVP.
+- Използвай общия `Button` компонент (variants: primary/secondary/ghost/danger) —
+  не пиши ad-hoc бутони.
+- Loading: skeleton loaders, не голи спинъри.
+- Цветовете се реферират през theme токените, не с хардкоднати hex стойности в className.

@@ -1,0 +1,20 @@
+---
+description: Код конвенции за rezerv-frontend (REZERV.md §5.2)
+alwaysApply: true
+---
+
+# rezerv-frontend код конвенции
+
+- React 19 + Vite + TypeScript **strict**. Без `any`; explicit типове на публични API-та.
+- Server state: **TanStack Query**. Локален state: useState/useReducer. Без Redux.
+- Форми: **react-hook-form + zod** (zodResolver). Валидационните схеми са в feature папката.
+- Routing: **React Router** с `RequireAuth`/`RequireRole` wrapper компоненти.
+- Структура на src/:
+  - `src/api/` — HTTP клиент + API функции (говорим САМО с gateway, `/api/**`)
+  - `src/auth/` — auth context, token handling
+  - `src/components/ui/` — общи UI компоненти (Button и т.н.)
+  - `src/features/<домейн>/` — feature-специфични компоненти/hooks/схеми
+  - `src/pages/` — страници (route компоненти)
+- Access token се пази САМО в паметта (auth context). НИКОГА в localStorage.
+- Целият видим текст е на **български**. Дати: `dd.MM.yyyy`, 24-часов формат.
+- Всеки бранч завършва с unit тестове (Vitest + React Testing Library) за новата функционалност.
