@@ -25,6 +25,7 @@ interface AuthState {
   user: UserResponse | null
   isAuthenticated: boolean
   setSession: (auth: AuthResponse) => void
+  refreshSession: () => Promise<void>
   logout: () => void
 }
 
@@ -56,6 +57,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshTokenRef.current = null
     sessionStorage.removeItem(REFRESH_TOKEN_KEY)
   }, [])
+
+  const refreshSession = useCallback(async () => {
+    const token = refreshTokenRef.current ?? sessionStorage.getItem(REFRESH_TOKEN_KEY)
+    if (token === null) {
+      throw new Error('Няма активна сесия')
+    }
+    const auth = await refreshRequest({ refreshToken: token })
+    setSession(auth)
+  }, [setSession])
 
   // Възстановяване на сесията след reload.
   useEffect(() => {
@@ -99,9 +109,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       isAuthenticated: accessToken !== null,
       setSession,
+      refreshSession,
       logout,
     }),
-    [accessToken, user, setSession, logout],
+    [accessToken, user, setSession, refreshSession, logout],
   )
 
   return <AuthContext value={value}>{isRestoring ? null : children}</AuthContext>

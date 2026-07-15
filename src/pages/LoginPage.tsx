@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { login } from '../api/auth'
 import { ApiError } from '../api/http'
 import { useAuth } from '../auth/AuthContext'
@@ -12,6 +12,8 @@ import { loginSchema, type LoginFormValues } from '../features/auth/schemas'
 export function LoginPage() {
   const { setSession } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = (location.state as { from?: string } | null)?.from ?? '/'
 
   const {
     register: field,
@@ -23,7 +25,7 @@ export function LoginPage() {
     mutationFn: login,
     onSuccess: (auth) => {
       setSession(auth)
-      navigate('/')
+      navigate(from)
     },
   })
 

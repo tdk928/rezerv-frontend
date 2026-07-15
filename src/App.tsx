@@ -1,5 +1,7 @@
 import { Route, Routes } from 'react-router'
 import { Layout } from './components/Layout'
+import { RequireAuth } from './components/RequireAuth'
+import { BusinessOnboardingPage } from './pages/BusinessOnboardingPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -17,6 +19,14 @@ export function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/status" element={<StatusPage />} />
+        <Route
+          path="/business/onboarding"
+          element={
+            <RequireAuth>
+              <BusinessOnboardingPage />
+            </RequireAuth>
+          }
+        />
       </Route>
     </Routes>
   )

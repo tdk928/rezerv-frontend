@@ -5,6 +5,8 @@ import { Button } from './ui/Button'
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuth()
   const navigate = useNavigate()
+  const showOnboarding =
+    isAuthenticated && (user?.companyId === null || user?.companyId === undefined)
 
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-surface/80 backdrop-blur">
@@ -14,6 +16,11 @@ export function Navbar() {
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          {showOnboarding && (
+            <Button variant="ghost" onClick={() => navigate('/business/onboarding')}>
+              Регистрирай фирма
+            </Button>
+          )}
           {isAuthenticated ? (
             <>
               <span className="hidden text-sm text-ink-secondary sm:inline">
