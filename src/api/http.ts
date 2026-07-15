@@ -33,6 +33,22 @@ export async function get<TResponse>(path: string): Promise<TResponse> {
   return handle<TResponse>(response)
 }
 
+export async function postAuth<TResponse>(
+  path: string,
+  body: unknown,
+  accessToken: string,
+): Promise<TResponse> {
+  const response = await fetch(`/api${path}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+  })
+  return handle<TResponse>(response)
+}
+
 async function handle<TResponse>(response: Response): Promise<TResponse> {
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null
