@@ -14,9 +14,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
 }
 
-export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {
+export function Button({ variant = 'primary', className = '', type = 'button', ...props }: ButtonProps) {
   return (
     <button
+      type={type}
       className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-all disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`}
       {...props}
     />

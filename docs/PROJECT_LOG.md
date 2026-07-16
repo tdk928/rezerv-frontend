@@ -6,6 +6,7 @@
 
 | # | Бранч | Обобщение |
 |---|-------|-----------|
+| 5 | feature/multi-company-ui | Multi-company: „Нова фирма“ винаги за логнати, `companyIds` в user, `switch-company` + `companies/mine` API. Navbar без firm dropdown. Onboarding без блок. 401→logout; StrictMode restore fix. |
 | 4 | feature/business-onboarding-ui | B2B onboarding wizard `/business/onboarding` (фирма → салон → услуга → снимка). Protected API calls + `refreshSession` след company create. Navbar „Регистрирай фирма“, RequireAuth guard. 6 нови unit теста (общо 29). |
 | 3 | feature/home-search-salons | Home page: hero + unified search (услуга + град с localStorage), категорийни плочки, топ салони от API. Нови страници `/salons` (резултати) и `/salons/:id` (детайл + услуги; „Запази" disabled). 4 нови unit теста. |
 | 2 | feature/session-persistence-dark-ui | Session persistence (refresh token в sessionStorage + restore при reload) и sliding session (+15 мин на клик, throttle 1/мин); logout; нова ТЪМНА тема (черен фон + gradient blue→violet→pink→orange, utilities text-gradient/bg-gradient-brand); sticky Navbar (Rezerv лого → /, Вход/Регистрация/Изход); HomePage на "/" с AI hero снимка; login/register редиректват към "/". 19 unit теста. |

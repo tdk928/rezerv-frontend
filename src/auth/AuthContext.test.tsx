@@ -4,6 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { renderApp } from '../test/renderApp'
 import { makeAuthResponse } from '../test/fixtures'
 import * as authApi from '../api/auth'
+import { postAuth, setUnauthorizedHandler } from '../api/http'
+import { resetAuthModuleStateForTests } from './AuthContext'
 
 vi.mock('../api/auth', { spy: true })
 
@@ -13,11 +15,12 @@ describe('AuthContext — session persistence', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     sessionStorage.clear()
+    resetAuthModuleStateForTests()
   })
 
   afterEach(() => {
-    // Връща Date.now (vi.spyOn) към оригинала.
     vi.restoreAllMocks()
+    setUnauthorizedHandler(null)
   })
 
   it('възстановява сесията след reload чрез refresh token-а', async () => {
@@ -32,7 +35,6 @@ describe('AuthContext — session persistence', () => {
       expect(screen.getByRole('button', { name: 'Изход' })).toBeInTheDocument()
     })
     expect(authApi.refresh).toHaveBeenCalledWith({ refreshToken: 'stored-refresh-token' })
-    // Rotation: новият token е записан за следващия reload.
     expect(sessionStorage.getItem(REFRESH_TOKEN_KEY)).toBe('rotated-token')
   })
 
@@ -62,28 +64,36 @@ describe('AuthContext — session persistence', () => {
     expect(sessionStorage.getItem(REFRESH_TOKEN_KEY)).toBeNull()
   })
 
-  it('sliding session: клик след throttle прозореца рефрешва token-а (+15 мин)', async () => {
+  it('401 от protected API (gateway) прави logout', async () => {
     sessionStorage.setItem(REFRESH_TOKEN_KEY, 'stored-refresh-token')
-    vi.mocked(authApi.refresh).mockResolvedValue(
-      makeAuthResponse({ refreshToken: 'rotated-token' }),
-    )
+    vi.mocked(authApi.refresh).mockResolvedValue(makeAuthResponse())
 
     renderApp('/')
     await screen.findByRole('button', { name: 'Изход' })
-    expect(authApi.refresh).toHaveBeenCalledTimes(1)
 
-    // Клик веднага след login-а НЕ рефрешва (throttle 60 сек).
-    await userEvent.click(screen.getByText('Запази час за минути'))
-    expect(authApi.refresh).toHaveBeenCalledTimes(1)
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            status: 401,
+            code: 'UNAUTHORIZED',
+            message: 'Invalid or expired token',
+            correlationId: 'c',
+            timestamp: '2026-07-16T00:00:00Z',
+          }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } },
+        ),
+      ),
+    )
 
-    // Клик 2 минути по-късно рефрешва с текущия (ротиран) token.
-    const realNow = Date.now()
-    vi.spyOn(Date, 'now').mockReturnValue(realNow + 2 * 60_000)
-    await userEvent.click(screen.getByText('Запази час за минути'))
+    await expect(postAuth('/business/companies', {}, 'expired-jwt')).rejects.toThrow(
+      'Invalid or expired token',
+    )
 
     await waitFor(() => {
-      expect(authApi.refresh).toHaveBeenCalledTimes(2)
+      expect(screen.getByRole('button', { name: 'Вход' })).toBeInTheDocument()
     })
-    expect(authApi.refresh).toHaveBeenLastCalledWith({ refreshToken: 'rotated-token' })
+    expect(sessionStorage.getItem(REFRESH_TOKEN_KEY)).toBeNull()
   })
 })

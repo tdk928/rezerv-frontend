@@ -1,3 +1,5 @@
+/** Говорим САМО с gateway-а; в dev Vite proxy препраща /api към :8080. */
+
 /** Формат на грешките от всички сервизи (REZERV.md §2.6). */
 export interface ApiErrorBody {
   status: number
@@ -18,7 +20,15 @@ export class ApiError extends Error {
   }
 }
 
-/** Говорим САМО с gateway-а; в dev Vite proxy препраща /api към :8080. */
+type UnauthorizedHandler = () => void
+
+let unauthorizedHandler: UnauthorizedHandler | null = null
+
+/** AuthProvider регистрира logout при 401 от gateway (изтекъл/невалиден JWT). */
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null): void {
+  unauthorizedHandler = handler
+}
+
 export async function post<TResponse>(path: string, body: unknown): Promise<TResponse> {
   const response = await fetch(`/api${path}`, {
     method: 'POST',
@@ -46,6 +56,19 @@ export async function postAuth<TResponse>(
     },
     body: JSON.stringify(body),
   })
+  if (response.status === 401) {
+    unauthorizedHandler?.()
+  }
+  return handle<TResponse>(response)
+}
+
+export async function getAuth<TResponse>(path: string, accessToken: string): Promise<TResponse> {
+  const response = await fetch(`/api${path}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (response.status === 401) {
+    unauthorizedHandler?.()
+  }
   return handle<TResponse>(response)
 }
 

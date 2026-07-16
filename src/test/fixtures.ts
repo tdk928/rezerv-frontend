@@ -1,9 +1,21 @@
 import type { AuthResponse } from '../api/auth'
 import type { City, PageResponse, SalonCard, ServiceCategory } from '../api/business'
 
+/** Минимален JWT с бъдещ exp — нужен за AuthContext logout-on-expired клик handler. */
+export function makeTestJwt(expSecondsFromNow = 3600): string {
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))
+  const payload = btoa(
+    JSON.stringify({
+      sub: '1',
+      exp: Math.floor(Date.now() / 1000) + expSecondsFromNow,
+    }),
+  )
+  return `${header}.${payload}.sig`
+}
+
 export function makeAuthResponse(overrides: Partial<AuthResponse> = {}): AuthResponse {
   return {
-    accessToken: 'jwt-token',
+    accessToken: makeTestJwt(),
     refreshToken: 'refresh-uuid',
     expiresInSeconds: 900,
     user: {
@@ -13,6 +25,7 @@ export function makeAuthResponse(overrides: Partial<AuthResponse> = {}): AuthRes
       firstName: 'Иван',
       lastName: 'Иванов',
       companyId: null,
+      companyIds: [],
       status: 'ACTIVE',
       roles: ['CLIENT'],
       createdAt: '2026-07-14T10:00:00Z',

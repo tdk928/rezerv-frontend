@@ -4,11 +4,11 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from 'react'
 import { refresh as refreshRequest, type AuthResponse, type UserResponse } from '../api/auth'
+import { setUnauthorizedHandler } from '../api/http'
 
 /**
  * Access token-ът живее САМО в паметта. Refresh token-ът се пази в sessionStorage,
@@ -17,8 +17,16 @@ import { refresh as refreshRequest, type AuthResponse, type UserResponse } from 
  */
 const REFRESH_TOKEN_KEY = 'rezerv.refreshToken'
 
-/** Sliding session: клик рефрешва token-а (+15 мин), но най-много веднъж в минута. */
-const SLIDE_THROTTLE_MS = 60_000
+/**
+ * Споделен promise за session restore — без него React StrictMode (dev) пуска
+ * два паралелни refresh със същия token; rotation-ът прави втория 401 → logout.
+ */
+let restoreInFlight: Promise<AuthResponse> | null = null
+
+/** Само за тестове — нулира module-level restore между case-ове. */
+export function resetAuthModuleStateForTests(): void {
+  restoreInFlight = null
+}
 
 interface AuthState {
   accessToken: string | null
@@ -31,6 +39,16 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null)
 
+function normalizeAuth(auth: AuthResponse): AuthResponse {
+  return {
+    ...auth,
+    user: {
+      ...auth.user,
+      companyIds: auth.user.companyIds ?? [],
+    },
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [user, setUser] = useState<UserResponse | null>(null)
@@ -38,70 +56,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => sessionStorage.getItem(REFRESH_TOKEN_KEY) !== null,
   )
 
-  const refreshTokenRef = useRef<string | null>(null)
-  const lastRefreshAtRef = useRef(0)
-  const refreshInFlightRef = useRef(false)
-  const restoreStartedRef = useRef(false)
+  const [refreshToken, setRefreshToken] = useState<string | null>(() =>
+    sessionStorage.getItem(REFRESH_TOKEN_KEY),
+  )
 
   const setSession = useCallback((auth: AuthResponse) => {
-    setAccessToken(auth.accessToken)
-    setUser(auth.user)
-    refreshTokenRef.current = auth.refreshToken
-    lastRefreshAtRef.current = Date.now()
-    sessionStorage.setItem(REFRESH_TOKEN_KEY, auth.refreshToken)
+    const normalized = normalizeAuth(auth)
+    setAccessToken(normalized.accessToken)
+    setUser(normalized.user)
+    setRefreshToken(normalized.refreshToken)
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, normalized.refreshToken)
   }, [])
 
   const logout = useCallback(() => {
     setAccessToken(null)
     setUser(null)
-    refreshTokenRef.current = null
+    setRefreshToken(null)
+    restoreInFlight = null
     sessionStorage.removeItem(REFRESH_TOKEN_KEY)
   }, [])
 
   const refreshSession = useCallback(async () => {
-    const token = refreshTokenRef.current ?? sessionStorage.getItem(REFRESH_TOKEN_KEY)
+    const token = refreshToken ?? sessionStorage.getItem(REFRESH_TOKEN_KEY)
     if (token === null) {
       throw new Error('Няма активна сесия')
     }
     const auth = await refreshRequest({ refreshToken: token })
     setSession(auth)
-  }, [setSession])
+  }, [refreshToken, setSession])
 
-  // Възстановяване на сесията след reload.
+  // Възстановяване на сесията след reload (един in-flight refresh за целия модул).
   useEffect(() => {
-    // Guard срещу StrictMode double-invoke: rotation-ът инвалидира стария token,
-    // втори паралелен refresh със същия token би върнал 401.
-    if (restoreStartedRef.current) return
-    restoreStartedRef.current = true
-
     const stored = sessionStorage.getItem(REFRESH_TOKEN_KEY)
-    if (stored === null) return
-
-    refreshRequest({ refreshToken: stored })
-      .then(setSession)
-      .catch(logout)
-      .finally(() => setIsRestoring(false))
-  }, [setSession, logout])
-
-  // Sliding session: всеки клик (throttle 1 мин) издава нов access token за +15 мин.
-  useEffect(() => {
-    const onClick = () => {
-      const token = refreshTokenRef.current
-      if (token === null || refreshInFlightRef.current) return
-      if (Date.now() - lastRefreshAtRef.current < SLIDE_THROTTLE_MS) return
-
-      refreshInFlightRef.current = true
-      refreshRequest({ refreshToken: token })
-        .then(setSession)
-        .catch(logout)
-        .finally(() => {
-          refreshInFlightRef.current = false
-        })
+    if (stored === null) {
+      setIsRestoring(false)
+      return
     }
 
-    document.addEventListener('click', onClick, { capture: true })
-    return () => document.removeEventListener('click', onClick, { capture: true })
+    if (restoreInFlight === null) {
+      restoreInFlight = refreshRequest({ refreshToken: stored }).finally(() => {
+        restoreInFlight = null
+      })
+    }
+
+    let cancelled = false
+    restoreInFlight
+      .then((auth) => {
+        if (!cancelled) setSession(auth)
+      })
+      .catch(() => {
+        if (!cancelled) logout()
+      })
+      .finally(() => {
+        if (!cancelled) setIsRestoring(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [setSession, logout])
+
+  // Gateway 401 (Invalid or expired token) на protected кол → logout.
+  useEffect(() => {
+    setUnauthorizedHandler(logout)
+    return () => setUnauthorizedHandler(null)
+  }, [logout])
 
   const value = useMemo<AuthState>(
     () => ({

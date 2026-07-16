@@ -34,7 +34,7 @@ function serverErrorMessage(error: unknown): string | null {
 }
 
 export function BusinessOnboardingPage() {
-  const { accessToken, user, refreshSession } = useAuth()
+  const { accessToken, refreshSession } = useAuth()
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [companyId, setCompanyId] = useState<number | null>(null)
@@ -43,21 +43,6 @@ export function BusinessOnboardingPage() {
 
   const citiesQuery = useQuery({ queryKey: ['cities'], queryFn: getCities })
   const categoriesQuery = useQuery({ queryKey: ['categories'], queryFn: getCategories })
-
-  const alreadyHasCompany =
-    user?.companyId !== null && user?.companyId !== undefined && companyId === null && step === 0
-
-  if (alreadyHasCompany) {
-    return (
-      <main className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-gradient mb-3 text-2xl font-bold">Вече имате фирма</h1>
-        <p className="mb-6 text-ink-secondary">
-          Акаунтът ви е свързан с фирма #{user.companyId}. Onboarding е достъпен само веднъж.
-        </p>
-        <Button onClick={() => navigate('/')}>Към началото</Button>
-      </main>
-    )
-  }
 
   if (doneMessage !== null) {
     return (
@@ -215,7 +200,8 @@ function SalonStep({
         description: values.description || undefined,
         cityId: Number(values.cityId),
         address: values.address,
-        phone: values.phone || undefined,
+        email: values.email,
+        phone: values.phone,
       }),
     onSuccess: (salon) => onSuccess(salon.id),
   })
@@ -264,9 +250,16 @@ function SalonStep({
         <input id="address" className={inputClasses} {...register('address')} />
         <FieldError message={errors.address?.message} />
       </div>
+      <div className="mb-4">
+        <label htmlFor="email" className={labelClasses}>
+          Email
+        </label>
+        <input id="email" type="email" className={inputClasses} {...register('email')} />
+        <FieldError message={errors.email?.message} />
+      </div>
       <div className="mb-6">
         <label htmlFor="phone" className={labelClasses}>
-          Телефон (по избор)
+          Телефон
         </label>
         <input id="phone" type="tel" className={inputClasses} {...register('phone')} />
         <FieldError message={errors.phone?.message} />

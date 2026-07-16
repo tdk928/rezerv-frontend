@@ -1,4 +1,4 @@
-import { postAuth } from './http'
+import { getAuth, postAuth } from './http'
 import type { City } from './business'
 
 /** Protected B2B onboarding — `/api/business/**` с JWT през gateway. */
@@ -22,7 +22,8 @@ export interface SalonResponse {
   address: string
   lat: number | null
   lng: number | null
-  phone: string | null
+  email: string
+  phone: string
   status: string
 }
 
@@ -56,7 +57,8 @@ export interface CreateSalonRequest {
   address: string
   lat?: number
   lng?: number
-  phone?: string
+  email: string
+  phone: string
 }
 
 export interface CreateSalonServiceRequest {
@@ -76,6 +78,10 @@ export function createCompany(
   request: CreateCompanyRequest,
 ): Promise<CompanyResponse> {
   return postAuth<CompanyResponse>('/business/companies', request, accessToken)
+}
+
+export function listMyCompanies(accessToken: string): Promise<CompanyResponse[]> {
+  return getAuth<CompanyResponse[]>('/business/companies/mine', accessToken)
 }
 
 export function createSalon(
