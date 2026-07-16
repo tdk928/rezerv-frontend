@@ -5,6 +5,7 @@ import { renderApp } from '../test/renderApp'
 import { makeAuthResponse } from '../test/fixtures'
 import * as authApi from '../api/auth'
 import { postAuth, setUnauthorizedHandler } from '../api/http'
+import { resetAuthModuleStateForTests } from './AuthContext'
 
 vi.mock('../api/auth', { spy: true })
 
@@ -14,6 +15,7 @@ describe('AuthContext — session persistence', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     sessionStorage.clear()
+    resetAuthModuleStateForTests()
   })
 
   afterEach(() => {
