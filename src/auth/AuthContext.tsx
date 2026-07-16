@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { refresh as refreshRequest, type AuthResponse, type UserResponse } from '../api/auth'
+import { setUnauthorizedHandler } from '../api/http'
 
 /**
  * Access token-ът живее САМО в паметта. Refresh token-ът се пази в sessionStorage,
@@ -16,9 +17,6 @@ import { refresh as refreshRequest, type AuthResponse, type UserResponse } from 
  * cookie — когато мине към cookie, sessionStorage отпада).
  */
 const REFRESH_TOKEN_KEY = 'rezerv.refreshToken'
-
-/** Sliding session: клик рефрешва token-а (+15 мин), но най-много веднъж в минута. */
-const SLIDE_THROTTLE_MS = 60_000
 
 interface AuthState {
   accessToken: string | null
@@ -39,15 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const refreshTokenRef = useRef<string | null>(null)
-  const lastRefreshAtRef = useRef(0)
-  const refreshInFlightRef = useRef(false)
   const restoreStartedRef = useRef(false)
 
   const setSession = useCallback((auth: AuthResponse) => {
     setAccessToken(auth.accessToken)
     setUser(auth.user)
     refreshTokenRef.current = auth.refreshToken
-    lastRefreshAtRef.current = Date.now()
     sessionStorage.setItem(REFRESH_TOKEN_KEY, auth.refreshToken)
   }, [])
 
@@ -75,7 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restoreStartedRef.current = true
 
     const stored = sessionStorage.getItem(REFRESH_TOKEN_KEY)
-    if (stored === null) return
+    if (stored === null) {
+      setIsRestoring(false)
+      return
+    }
 
     refreshRequest({ refreshToken: stored })
       .then(setSession)
@@ -83,25 +81,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsRestoring(false))
   }, [setSession, logout])
 
-  // Sliding session: всеки клик (throttle 1 мин) издава нов access token за +15 мин.
+  // Gateway 401 (Invalid or expired token) на protected кол → logout.
   useEffect(() => {
-    const onClick = () => {
-      const token = refreshTokenRef.current
-      if (token === null || refreshInFlightRef.current) return
-      if (Date.now() - lastRefreshAtRef.current < SLIDE_THROTTLE_MS) return
-
-      refreshInFlightRef.current = true
-      refreshRequest({ refreshToken: token })
-        .then(setSession)
-        .catch(logout)
-        .finally(() => {
-          refreshInFlightRef.current = false
-        })
-    }
-
-    document.addEventListener('click', onClick, { capture: true })
-    return () => document.removeEventListener('click', onClick, { capture: true })
-  }, [setSession, logout])
+    setUnauthorizedHandler(logout)
+    return () => setUnauthorizedHandler(null)
+  }, [logout])
 
   const value = useMemo<AuthState>(
     () => ({

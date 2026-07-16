@@ -64,7 +64,8 @@ export interface SalonDetail {
   address: string
   lat: number | null
   lng: number | null
-  phone: string | null
+  email: string
+  phone: string
   ratingAvg: number
   ratingCount: number
   photos: string[]

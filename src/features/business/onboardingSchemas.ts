@@ -4,7 +4,7 @@ export const companySchema = z.object({
   eik: z
     .string()
     .trim()
-    .regex(/^[0-9]{9}$|^[0-9]{13}$/, 'ЕИК трябва да е 9 или 13 цифри'),
+    .regex(/^[0-9]{9}$/, 'ЕИК трябва да е 9 цифри'),
   name: z.string().trim().min(1, 'Въведете име на фирмата').max(200),
   legalName: z.string().trim().min(1, 'Въведете юридическо име').max(200),
 })
@@ -14,7 +14,8 @@ export const salonSchema = z.object({
   description: z.string().trim().max(5000).optional(),
   cityId: z.string().min(1, 'Изберете град'),
   address: z.string().trim().min(1, 'Въведете адрес').max(300),
-  phone: z.string().trim().max(30).optional(),
+  email: z.email('Невалиден email адрес'),
+  phone: z.string().trim().min(1, 'Въведете телефон').max(30),
 })
 
 export const serviceSchema = z.object({

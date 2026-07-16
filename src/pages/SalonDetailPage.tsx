@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router'
-import { Clock, MapPin, Phone, Star } from 'lucide-react'
+import { Clock, Mail, MapPin, Phone, Star } from 'lucide-react'
 import { getSalon } from '../api/business'
 import { Button } from '../components/ui/Button'
 
@@ -62,6 +62,12 @@ export function SalonDetailPage() {
               <MapPin aria-hidden className="size-4 shrink-0" />
               {salon.address}, {salon.city.name}
             </p>
+            {salon.email && (
+              <p className="mt-1 flex items-center gap-1 text-sm text-ink-secondary">
+                <Mail aria-hidden className="size-4 shrink-0" />
+                {salon.email}
+              </p>
+            )}
             {salon.phone && (
               <p className="mt-1 flex items-center gap-1 text-sm text-ink-secondary">
                 <Phone aria-hidden className="size-4 shrink-0" />

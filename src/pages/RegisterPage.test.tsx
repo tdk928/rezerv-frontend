@@ -16,6 +16,7 @@ const authResponse = makeAuthResponse({
     firstName: 'Мария',
     lastName: 'Петрова',
     companyId: null,
+    companyIds: [],
     status: 'ACTIVE',
     roles: ['CLIENT'],
     createdAt: '2026-07-14T10:00:00Z',

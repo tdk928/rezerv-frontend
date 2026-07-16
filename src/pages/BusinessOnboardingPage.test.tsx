@@ -5,7 +5,7 @@ import { renderApp } from '../test/renderApp'
 import { makeAuthResponse, makeCategories, makeCities } from '../test/fixtures'
 import * as authApi from '../api/auth'
 import { getCategories, getCities } from '../api/business'
-import { createCompany } from '../api/businessOnboarding'
+import { createCompany, listMyCompanies } from '../api/businessOnboarding'
 
 vi.mock('../api/auth', { spy: true })
 vi.mock('../api/business', () => ({
@@ -19,6 +19,7 @@ vi.mock('../api/businessOnboarding', () => ({
   createSalon: vi.fn(),
   createSalonService: vi.fn(),
   createSalonPhoto: vi.fn(),
+  listMyCompanies: vi.fn(),
 }))
 
 const REFRESH_TOKEN_KEY = 'rezerv.refreshToken'
@@ -29,6 +30,7 @@ describe('BusinessOnboardingPage', () => {
     sessionStorage.clear()
     vi.mocked(getCities).mockResolvedValue(makeCities())
     vi.mocked(getCategories).mockResolvedValue(makeCategories())
+    vi.mocked(listMyCompanies).mockResolvedValue([])
   })
 
   it('пренасочва към login без автентикация', async () => {
@@ -37,11 +39,9 @@ describe('BusinessOnboardingPage', () => {
     expect(await screen.findByRole('heading', { name: 'Вход' })).toBeInTheDocument()
   })
 
-  it('показва форма за фирма при логнат user без companyId', async () => {
+  it('показва форма за фирма при логнат user', async () => {
     sessionStorage.setItem(REFRESH_TOKEN_KEY, 'refresh-token')
-    vi.mocked(authApi.refresh).mockResolvedValue(
-      makeAuthResponse({ user: { ...makeAuthResponse().user, companyId: null } }),
-    )
+    vi.mocked(authApi.refresh).mockResolvedValue(makeAuthResponse())
 
     renderApp('/business/onboarding')
 
@@ -52,14 +52,13 @@ describe('BusinessOnboardingPage', () => {
   it('след успешна фирма рефрешва сесията и показва стъпка Салон', async () => {
     sessionStorage.setItem(REFRESH_TOKEN_KEY, 'refresh-token')
     vi.mocked(authApi.refresh)
-      .mockResolvedValueOnce(
-        makeAuthResponse({ user: { ...makeAuthResponse().user, companyId: null } }),
-      )
+      .mockResolvedValueOnce(makeAuthResponse())
       .mockResolvedValueOnce(
         makeAuthResponse({
           user: {
             ...makeAuthResponse().user,
             companyId: 50,
+            companyIds: [50],
             roles: ['BUSINESS_OWNER', 'CLIENT'],
           },
         }),
@@ -89,13 +88,14 @@ describe('BusinessOnboardingPage', () => {
     expect(await screen.findByLabelText('Име на салона')).toBeInTheDocument()
   })
 
-  it('показва съобщение ако user вече има фирма', async () => {
+  it('позволява нова фирма ако user вече има companyId', async () => {
     sessionStorage.setItem(REFRESH_TOKEN_KEY, 'refresh-token')
     vi.mocked(authApi.refresh).mockResolvedValue(
       makeAuthResponse({
         user: {
           ...makeAuthResponse().user,
           companyId: 99,
+          companyIds: [99],
           roles: ['BUSINESS_OWNER', 'CLIENT'],
         },
       }),
@@ -103,6 +103,7 @@ describe('BusinessOnboardingPage', () => {
 
     renderApp('/business/onboarding')
 
-    expect(await screen.findByText('Вече имате фирма')).toBeInTheDocument()
+    expect(await screen.findByLabelText('ЕИК')).toBeInTheDocument()
+    expect(screen.queryByText('Вече имате фирма')).not.toBeInTheDocument()
   })
 })
