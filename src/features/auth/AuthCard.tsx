@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 /** Обща обвивка за login/registration страниците. */
 export function AuthCard({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <main className="flex flex-1 items-center justify-center px-4 py-10">
+    <main className="flex flex-1 items-start justify-center px-4 pt-10 pb-10">
       <div className="w-full max-w-md rounded-2xl border border-line bg-card p-6 sm:p-8">
         <h1 className="text-gradient mb-1 text-center text-3xl font-extrabold tracking-tight">
           Rezerv
