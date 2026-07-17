@@ -8,7 +8,7 @@ export function AuthCard({ title, children }: { title: string; children: ReactNo
         <h1 className="text-gradient mb-1 text-center text-3xl font-extrabold tracking-tight">
           Rezerv
         </h1>
-        <h2 className="mb-6 text-center text-lg font-semibold text-ink">{title}</h2>
+        <h2 className="text-gradient-soft mb-6 text-center text-lg font-semibold">{title}</h2>
         {children}
       </div>
     </main>

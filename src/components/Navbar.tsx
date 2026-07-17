@@ -6,6 +6,7 @@ export function Navbar() {
   const { isAuthenticated, user, logout } = useAuth()
   const navigate = useNavigate()
   const hasCompany = (user?.companyIds?.length ?? 0) > 0
+  const isAdmin = (user?.roles ?? []).includes('PLATFORM_ADMIN')
 
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-surface/80 backdrop-blur">
@@ -15,7 +16,17 @@ export function Navbar() {
         </Link>
 
         <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-          {isAuthenticated && (
+          {isAuthenticated && hasCompany && (
+            <Button variant="ghost" onClick={() => navigate('/business/companies')}>
+              Моите фирми
+            </Button>
+          )}
+          {isAdmin && (
+            <Button variant="ghost" onClick={() => navigate('/admin/companies')}>
+              Всички фирми
+            </Button>
+          )}
+          {isAuthenticated && !isAdmin && (
             <Button variant="ghost" onClick={() => navigate('/business/onboarding')}>
               {hasCompany ? 'Нова фирма' : 'Регистрирай фирма'}
             </Button>

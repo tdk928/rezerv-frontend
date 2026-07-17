@@ -50,13 +50,13 @@ export function HomePage() {
 
       {/* Категорийни плочки */}
       <section className="mb-12">
-        <h2 className="mb-4 text-lg font-semibold text-ink">Популярни категории</h2>
+        <h2 className="text-gradient-soft mb-4 text-lg font-semibold">Популярни категории</h2>
         <CategoryTiles categories={categories} cityId={cityId} />
       </section>
 
       {/* Топ салони */}
       <section className="mb-12">
-        <h2 className="mb-4 text-lg font-semibold text-ink">
+        <h2 className="text-gradient-soft mb-4 text-lg font-semibold">
           Топ салони{city ? ` в ${city.name}` : ''}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -71,7 +71,7 @@ export function HomePage() {
 
       {/* Как работи */}
       <section className="rounded-2xl border border-line bg-card p-6 sm:p-8">
-        <h2 className="mb-6 text-center text-lg font-semibold text-ink">Как работи</h2>
+        <h2 className="text-gradient-soft mb-6 text-center text-lg font-semibold">Как работи</h2>
         <div className="grid gap-6 sm:grid-cols-3">
           {HOW_IT_WORKS.map((item) => (
             <div key={item.step} className="text-center">

@@ -1,22 +1,16 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
-import { createCompany, createSalon } from '../api/businessOnboarding'
-import { getCities } from '../api/business'
+import { createCompany } from '../api/businessOnboarding'
 import { ApiError } from '../api/http'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
 import { FieldError, inputClasses, labelClasses } from '../features/auth/AuthCard'
-import {
-  companySchema,
-  salonSchema,
-  type CompanyFormValues,
-  type SalonFormValues,
-} from '../features/business/onboardingSchemas'
+import { companySchema, type CompanyFormValues } from '../features/business/onboardingSchemas'
 
-const STEPS = ['Фирма', 'Обект', 'Условия', 'Подпис'] as const
+const STEPS = ['Фирма', 'Условия и подпис'] as const
 
 const TERMS_LOREM =
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
@@ -31,17 +25,14 @@ export function BusinessOnboardingPage() {
   const { accessToken, refreshSession } = useAuth()
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
-  const [companyId, setCompanyId] = useState<number | null>(null)
   const [doneMessage, setDoneMessage] = useState<string | null>(null)
-
-  const citiesQuery = useQuery({ queryKey: ['cities'], queryFn: getCities })
 
   if (doneMessage !== null) {
     return (
       <main className="mx-auto max-w-lg px-4 py-16 text-center">
         <h1 className="text-gradient mb-3 text-2xl font-bold">Готово!</h1>
         <p className="mb-6 text-ink-secondary">{doneMessage}</p>
-        <Button onClick={() => navigate('/')}>Към началото</Button>
+        <Button onClick={() => navigate('/business/companies')}>Към моите фирми</Button>
       </main>
     )
   }
@@ -67,28 +58,17 @@ export function BusinessOnboardingPage() {
         {step === 0 && accessToken !== null && (
           <CompanyStep
             accessToken={accessToken}
-            onSuccess={async (id) => {
-              setCompanyId(id)
+            onSuccess={async () => {
               await refreshSession()
               setStep(1)
             }}
           />
         )}
-        {step === 1 && accessToken !== null && companyId !== null && (
-          <SalonStep
-            accessToken={accessToken}
-            companyId={companyId}
-            cities={citiesQuery.data ?? []}
-            citiesLoading={citiesQuery.isLoading}
-            onSuccess={() => setStep(2)}
-          />
-        )}
-        {step === 2 && <TermsStep onContinue={() => setStep(3)} />}
-        {step === 3 && (
-          <SignStep
+        {step === 1 && (
+          <TermsAndSignStep
             onComplete={() =>
               setDoneMessage(
-                'Фирмата и обектът са регистрирани. Услуги и снимки можете да добавите от администрацията. Очаква одобрение от администратор.',
+                'Фирмата е регистрирана и очаква одобрение. Обекти можете да добавите от „Моите фирми“.',
               )
             }
           />
@@ -103,7 +83,7 @@ function CompanyStep({
   onSuccess,
 }: {
   accessToken: string
-  onSuccess: (companyId: number) => Promise<void>
+  onSuccess: () => Promise<void>
 }) {
   const {
     register,
@@ -113,7 +93,7 @@ function CompanyStep({
 
   const mutation = useMutation({
     mutationFn: (values: CompanyFormValues) => createCompany(accessToken, values),
-    onSuccess: async (company) => onSuccess(company.id),
+    onSuccess: async () => onSuccess(),
   })
 
   const serverError = serverErrorMessage(mutation.error)
@@ -134,12 +114,26 @@ function CompanyStep({
         <input id="name" className={inputClasses} {...register('name')} />
         <FieldError message={errors.name?.message} />
       </div>
-      <div className="mb-6">
+      <div className="mb-4">
         <label htmlFor="legalName" className={labelClasses}>
           Юридическо име
         </label>
         <input id="legalName" className={inputClasses} {...register('legalName')} />
         <FieldError message={errors.legalName?.message} />
+      </div>
+      <div className="mb-4">
+        <label htmlFor="email" className={labelClasses}>
+          Email за контакт
+        </label>
+        <input id="email" type="email" className={inputClasses} {...register('email')} />
+        <FieldError message={errors.email?.message} />
+      </div>
+      <div className="mb-6">
+        <label htmlFor="phone" className={labelClasses}>
+          Телефон за контакт
+        </label>
+        <input id="phone" type="tel" className={inputClasses} {...register('phone')} />
+        <FieldError message={errors.phone?.message} />
       </div>
       {serverError && (
         <p className="mb-4 rounded-lg bg-brand-soft px-3 py-2 text-sm text-danger">{serverError}</p>
@@ -151,110 +145,10 @@ function CompanyStep({
   )
 }
 
-function SalonStep({
-  accessToken,
-  companyId,
-  cities,
-  citiesLoading,
-  onSuccess,
-}: {
-  accessToken: string
-  companyId: number
-  cities: { id: number; name: string }[]
-  citiesLoading: boolean
-  onSuccess: () => void
-}) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SalonFormValues>({ resolver: zodResolver(salonSchema) })
-
-  const mutation = useMutation({
-    mutationFn: (values: SalonFormValues) =>
-      createSalon(accessToken, companyId, {
-        name: values.name,
-        description: values.description || undefined,
-        cityId: Number(values.cityId),
-        address: values.address,
-        email: values.email,
-        phone: values.phone,
-      }),
-    onSuccess: () => onSuccess(),
-  })
-
-  const serverError = serverErrorMessage(mutation.error)
-
-  return (
-    <form onSubmit={handleSubmit((values) => mutation.mutate(values))} noValidate>
-      <div className="mb-4">
-        <label htmlFor="salonName" className={labelClasses}>
-          Име на обекта
-        </label>
-        <input id="salonName" className={inputClasses} {...register('name')} />
-        <FieldError message={errors.name?.message} />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="description" className={labelClasses}>
-          Описание (по избор)
-        </label>
-        <textarea
-          id="description"
-          rows={3}
-          className={inputClasses}
-          {...register('description')}
-        />
-        <FieldError message={errors.description?.message} />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="cityId" className={labelClasses}>
-          Град
-        </label>
-        <select id="cityId" className={inputClasses} disabled={citiesLoading} {...register('cityId')}>
-          <option value="">Изберете град</option>
-          {cities.map((city) => (
-            <option key={city.id} value={city.id}>
-              {city.name}
-            </option>
-          ))}
-        </select>
-        <FieldError message={errors.cityId?.message} />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="address" className={labelClasses}>
-          Адрес
-        </label>
-        <input id="address" className={inputClasses} {...register('address')} />
-        <FieldError message={errors.address?.message} />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="email" className={labelClasses}>
-          Email
-        </label>
-        <input id="email" type="email" className={inputClasses} {...register('email')} />
-        <FieldError message={errors.email?.message} />
-      </div>
-      <div className="mb-6">
-        <label htmlFor="phone" className={labelClasses}>
-          Телефон
-        </label>
-        <input id="phone" type="tel" className={inputClasses} {...register('phone')} />
-        <FieldError message={errors.phone?.message} />
-      </div>
-      {serverError && (
-        <p className="mb-4 rounded-lg bg-brand-soft px-3 py-2 text-sm text-danger">{serverError}</p>
-      )}
-      <Button type="submit" className="w-full" disabled={mutation.isPending}>
-        {mutation.isPending ? 'Създаване…' : 'Продължи'}
-      </Button>
-    </form>
-  )
-}
-
-function TermsStep({ onContinue }: { onContinue: () => void }) {
+function TermsAndSignStep({ onComplete }: { onComplete: () => void }) {
   return (
     <div>
-      <h2 className="mb-3 text-lg font-semibold text-ink">Общи условия</h2>
+      <h2 className="text-gradient-soft mb-3 text-lg font-semibold">Общи условия и подпис</h2>
       <p className="mb-6 text-sm leading-relaxed text-ink-secondary">{TERMS_LOREM}</p>
 
       <div className="mb-6 flex flex-col gap-2 sm:flex-row">
@@ -274,25 +168,9 @@ function TermsStep({ onContinue }: { onContinue: () => void }) {
         </button>
       </div>
 
-      <p className="mb-6 text-xs text-ink-muted">
-        PDF документите ще бъдат налични скоро. Продължете към електронния подпис.
-      </p>
-
-      <Button type="button" className="w-full" onClick={onContinue}>
-        Продължи
-      </Button>
-    </div>
-  )
-}
-
-function SignStep({ onComplete }: { onComplete: () => void }) {
-  return (
-    <div>
-      <h2 className="mb-3 text-lg font-semibold text-ink">Електронен подпис</h2>
       <p className="mb-6 text-sm leading-relaxed text-ink-secondary">
         С натискане на бутона потвърждавате, че сте запознати с общите условия и договора за
-        ползване на платформата REZERV. Интеграцията с Borica / Evrotrust ще бъде добавена на
-        следващ етап.
+        ползване. PDF и Borica / Evrotrust ще бъдат добавени на следващ етап.
       </p>
 
       <Button type="button" className="w-full" onClick={onComplete}>
