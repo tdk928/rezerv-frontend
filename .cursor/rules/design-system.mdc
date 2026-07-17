@@ -15,6 +15,7 @@ alwaysApply: true
 - Brand Apple blue `#0071e3` (не purple rainbow бутони)
 - Форми: карти `rounded-3xl`, бутони `rounded-full` (pill)
 - Шрифт: SF Pro / `-apple-system` (нарочно)
+- Chrome: горен Navbar (само auth) + ляв Sidebar (бизнес линкове, active pill)
 
 Правила: glass за навигация/карти/контроли; mobile-first; `Button`; токени вместо hex;
 уважавай `prefers-reduced-transparency`; без тъмна тема в този бранч.

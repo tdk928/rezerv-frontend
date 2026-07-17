@@ -43,7 +43,8 @@ Glass е **функционален слой** (навигация, контро
 ## 4. Компоненти
 
 - **Button**: `rounded-full`, primary = brand blue; secondary = glass + border; ghost = transparent.
-- **Navbar**: sticky floating `glass` bar, без тежък `border-b`.
+- **Navbar**: sticky floating `glass` pill bar — само лого + Вход/Регистрация/Изход.
+- **Sidebar**: ляв glass панел (Adobe-style) — Начало, Моите фирми, Всички фирми, Регистрирай/Нова фирма; active = бял pill.
 - **AuthCard / forms**: `glass-strong` + `rounded-3xl`; inputs pill-ish `rounded-2xl` на `bg-white/70`.
 - **SalonCard / tiles**: `glass`, hover леко scale/shadow.
 - **Tables** (admin): glass container, чисти редове, status pills.
