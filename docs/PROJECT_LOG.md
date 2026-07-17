@@ -6,6 +6,7 @@
 
 | # | Бранч | Обобщение |
 |---|-------|-----------|
+| 9 | feature/liquid-glass-ui | Цял UI → Apple Liquid Glass: светла тема, frosted `glass` панели, pill бутони, Apple blue, mesh ambient фон. |
 | 8 | feature/my-companies-admin-panel | `/business/companies` — моите фирми+обекти; `/admin/companies` — всички фирми+owners (PLATFORM_ADMIN). RequireRole + Navbar линкове. |
 | 7 | feature/auth-forms-aligned-top | AuthCard: login/register с еднакъв top offset от navbar (`items-start` + `pt-10` вместо вертикално центриране). |
 | 6 | feature/onboarding-simplify-terms-sign | Onboarding: фирма → обект → условия → подпис. Махнати услуга/снимка от wizard. „Име на обекта“. Скелет за PDF условия + „Подпиши и завърши“ (без Borica засега). 31 unit теста. |

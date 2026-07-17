@@ -3,7 +3,7 @@ import { Navbar } from './Navbar'
 
 export function Layout() {
   return (
-    <div className="flex min-h-screen flex-col bg-surface">
+    <div className="relative flex min-h-screen flex-col">
       <Navbar />
       <Outlet />
     </div>

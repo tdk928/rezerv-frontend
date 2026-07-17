@@ -7,13 +7,12 @@ interface CategoryTilesProps {
   cityId: number | undefined
 }
 
-/** Плочките — главният вход: 1 клик = списък салони от категорията в твоя град. */
 export function CategoryTiles({ categories, cityId }: CategoryTilesProps) {
   if (!categories) {
     return (
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {Array.from({ length: 8 }, (_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-2xl bg-card" />
+          <div key={i} className="glass h-28 animate-pulse rounded-3xl" />
         ))}
       </div>
     )
@@ -28,13 +27,12 @@ export function CategoryTiles({ categories, cityId }: CategoryTilesProps) {
           <Link
             key={category.id}
             to={`/salons?${params.toString()}`}
-            className="group flex flex-col items-center gap-2 rounded-2xl border border-line bg-card p-4 transition-colors hover:border-brand"
+            className="glass group flex flex-col items-center gap-2.5 rounded-3xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand/10"
           >
-            <CategoryIcon
-              code={category.icon}
-              className="size-6 text-ink-secondary transition-colors group-hover:text-brand"
-            />
-            <span className="text-center text-sm font-medium text-ink">{category.name}</span>
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-brand-soft">
+              <CategoryIcon code={category.icon} className="size-5 text-brand" />
+            </span>
+            <span className="text-center text-sm font-semibold text-ink">{category.name}</span>
           </Link>
         )
       })}

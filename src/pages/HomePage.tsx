@@ -30,33 +30,31 @@ export function HomePage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-      {/* Hero + търсачка */}
-      <section className="mb-12 flex flex-col items-center gap-6 text-center">
+      <section className="mb-12 flex flex-col items-center gap-7 text-center">
         <div className="space-y-3">
-          <h1 className="text-gradient text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <p className="text-sm font-semibold tracking-wide text-brand">Rezerv</p>
+          <h1 className="text-4xl font-bold tracking-tight text-ink sm:text-5xl">
             Запази час за минути
           </h1>
-          <p className="mx-auto max-w-lg text-sm text-ink-secondary sm:text-base">
+          <p className="mx-auto max-w-lg text-base text-ink-secondary">
             Намери салон, избери услуга и резервирай — без обаждания и чакане.
           </p>
         </div>
 
         {citiesLoading || !cities ? (
-          <div className="h-14 w-full max-w-2xl animate-pulse rounded-2xl bg-card" />
+          <div className="glass h-16 w-full max-w-2xl animate-pulse rounded-full" />
         ) : (
           <SearchBar cities={cities} cityId={cityId} onCityChange={setCityId} />
         )}
       </section>
 
-      {/* Категорийни плочки */}
       <section className="mb-12">
-        <h2 className="text-gradient-soft mb-4 text-lg font-semibold">Популярни категории</h2>
+        <h2 className="mb-4 text-xl font-semibold tracking-tight text-ink">Популярни категории</h2>
         <CategoryTiles categories={categories} cityId={cityId} />
       </section>
 
-      {/* Топ салони */}
       <section className="mb-12">
-        <h2 className="text-gradient-soft mb-4 text-lg font-semibold">
+        <h2 className="mb-4 text-xl font-semibold tracking-tight text-ink">
           Топ салони{city ? ` в ${city.name}` : ''}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -69,14 +67,15 @@ export function HomePage() {
         )}
       </section>
 
-      {/* Как работи */}
-      <section className="rounded-2xl border border-line bg-card p-6 sm:p-8">
-        <h2 className="text-gradient-soft mb-6 text-center text-lg font-semibold">Как работи</h2>
+      <section className="glass rounded-3xl p-7 sm:p-9">
+        <h2 className="mb-7 text-center text-xl font-semibold tracking-tight text-ink">Как работи</h2>
         <div className="grid gap-6 sm:grid-cols-3">
           {HOW_IT_WORKS.map((item) => (
             <div key={item.step} className="text-center">
-              <span className="text-gradient text-2xl font-extrabold">{item.step}</span>
-              <h3 className="mt-2 font-semibold text-ink">{item.title}</h3>
+              <span className="inline-flex size-10 items-center justify-center rounded-full bg-brand text-lg font-bold text-white shadow-sm shadow-brand/30">
+                {item.step}
+              </span>
+              <h3 className="mt-3 font-semibold text-ink">{item.title}</h3>
               <p className="mt-1 text-sm text-ink-secondary">{item.text}</p>
             </div>
           ))}

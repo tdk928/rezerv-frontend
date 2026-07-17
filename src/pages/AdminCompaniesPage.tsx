@@ -16,11 +16,11 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_BADGE: Record<string, string> = {
   PENDING_APPROVAL:
-    'inline-flex items-center rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm',
+    'inline-flex items-center rounded-full bg-warning px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm',
   APPROVED:
-    'inline-flex items-center rounded-lg bg-gradient-to-r from-emerald-500 to-teal-400 px-3 py-1.5 text-sm font-semibold text-white shadow-sm',
+    'inline-flex items-center rounded-full bg-success px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm',
   SUSPENDED:
-    'inline-flex items-center rounded-lg bg-gradient-to-r from-rose-500 to-red-500 px-3 py-1.5 text-sm font-semibold text-white shadow-sm',
+    'inline-flex items-center rounded-full bg-danger px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm',
 }
 
 type SortKey = 'name' | 'eik' | 'status' | 'ownerName' | 'ownerEmail' | 'createdAt' | 'updatedAt'
@@ -88,7 +88,7 @@ function SortHeader({
       >
         <span className={isActive ? 'font-semibold' : undefined}>{label}</span>
         <span
-          className={`flex h-5 w-5 items-center justify-center rounded-md ${
+          className={`flex h-5 w-5 items-center justify-center rounded-full ${
             isActive ? 'bg-brand-soft text-brand' : 'text-ink-muted group-hover:text-ink-secondary'
           }`}
           aria-hidden
@@ -162,13 +162,13 @@ export function AdminCompaniesPage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       <div className="mb-8">
-        <h1 className="text-gradient text-3xl font-extrabold tracking-tight">Всички фирми</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-ink">Всички фирми</h1>
         <p className="mt-2 text-sm text-ink-secondary">
           Регистрирани фирми и собственици.
           {pendingCount > 0 ? (
             <>
               {' '}
-              <span className="text-warning">{pendingCount} чакат одобрение</span>.
+              <span className="font-semibold text-warning">{pendingCount} чакат одобрение</span>.
             </>
           ) : null}
         </p>
@@ -176,7 +176,7 @@ export function AdminCompaniesPage() {
 
       {query.isLoading && <p className="text-sm text-ink-muted">Зареждане…</p>}
       {query.isError && (
-        <p className="rounded-lg bg-brand-soft px-3 py-2 text-sm text-danger">
+        <p className="glass-tint rounded-2xl px-4 py-3 text-sm text-danger">
           Неуспешно зареждане (нужна роля PLATFORM_ADMIN).
         </p>
       )}
@@ -185,9 +185,9 @@ export function AdminCompaniesPage() {
       )}
 
       {sortedRows.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl border border-line">
+        <div className="glass overflow-x-auto rounded-3xl">
           <table className="w-full min-w-[56rem] text-left text-sm">
-            <thead className="border-b border-line bg-card">
+            <thead className="border-b border-line bg-white/40">
               <tr>
                 <SortHeader label="Фирма" column="name" active={sortKey} dir={sortDir} onSort={toggleSort} />
                 <SortHeader label="ЕИК" column="eik" active={sortKey} dir={sortDir} onSort={toggleSort} />
@@ -231,7 +231,7 @@ export function AdminCompaniesPage() {
                 return (
                   <tr
                     key={row.id}
-                    className={`border-b border-line last:border-0 ${pending ? 'bg-brand-soft/40' : ''}`}
+                    className={`border-b border-line last:border-0 ${pending ? 'bg-brand-soft/50' : ''}`}
                   >
                     <td className="px-4 py-3">
                       <p className="font-medium text-ink">{row.name}</p>
@@ -250,7 +250,7 @@ export function AdminCompaniesPage() {
                     <td className="px-4 py-3">
                       {pending ? (
                         <Button
-                          className="!px-3 !py-1.5 text-xs"
+                          className="!px-4 !py-1.5 text-xs"
                           disabled={approveMutation.isPending}
                           onClick={() => approveMutation.mutate(row.id)}
                         >
@@ -269,7 +269,7 @@ export function AdminCompaniesPage() {
       )}
 
       {approveMutation.isError && (
-        <p className="mt-4 rounded-lg bg-brand-soft px-3 py-2 text-sm text-danger">
+        <p className="mt-4 glass-tint rounded-2xl px-4 py-3 text-sm text-danger">
           Неуспешно одобрение. Опитайте отново.
         </p>
       )}

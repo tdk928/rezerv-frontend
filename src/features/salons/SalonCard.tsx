@@ -2,12 +2,11 @@ import { Link } from 'react-router'
 import { MapPin, Star } from 'lucide-react'
 import type { SalonCard as SalonCardData } from '../../api/business'
 
-/** Карта на салон — ползва се на home ("Топ салони") и в списъка с резултати. */
 export function SalonCard({ salon }: { salon: SalonCardData }) {
   return (
     <Link
       to={`/salons/${salon.id}`}
-      className="group overflow-hidden rounded-2xl border border-line bg-card transition-colors hover:border-brand"
+      className="glass group overflow-hidden rounded-3xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand/10"
     >
       {salon.photoUrl ? (
         <img
@@ -17,12 +16,12 @@ export function SalonCard({ salon }: { salon: SalonCardData }) {
           className="aspect-[4/3] w-full object-cover"
         />
       ) : (
-        <div className="aspect-[4/3] w-full bg-surface" />
+        <div className="aspect-[4/3] w-full bg-gradient-to-br from-brand-soft to-white/40" />
       )}
 
       <div className="flex flex-col gap-1 p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-ink">{salon.name}</h3>
+          <h3 className="font-semibold tracking-tight text-ink">{salon.name}</h3>
           <span className="flex shrink-0 items-center gap-1 text-sm text-ink">
             <Star aria-hidden className="size-4 fill-warning text-warning" />
             {salon.ratingAvg.toFixed(1)}
@@ -47,11 +46,11 @@ export function SalonCard({ salon }: { salon: SalonCardData }) {
 
 export function SalonCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-card">
-      <div className="aspect-[4/3] w-full animate-pulse bg-surface" />
+    <div className="glass overflow-hidden rounded-3xl">
+      <div className="aspect-[4/3] w-full animate-pulse bg-white/40" />
       <div className="flex flex-col gap-2 p-4">
-        <div className="h-4 w-2/3 animate-pulse rounded bg-surface" />
-        <div className="h-3 w-1/2 animate-pulse rounded bg-surface" />
+        <div className="h-4 w-2/3 animate-pulse rounded-full bg-white/50" />
+        <div className="h-3 w-1/2 animate-pulse rounded-full bg-white/40" />
       </div>
     </div>
   )

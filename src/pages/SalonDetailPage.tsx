@@ -17,9 +17,9 @@ export function SalonDetailPage() {
   if (isLoading) {
     return (
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-        <div className="h-64 animate-pulse rounded-2xl bg-card" />
-        <div className="mt-6 h-8 w-1/3 animate-pulse rounded bg-card" />
-        <div className="mt-4 h-4 w-1/2 animate-pulse rounded bg-card" />
+        <div className="glass h-64 animate-pulse rounded-3xl" />
+        <div className="mt-6 h-8 w-1/3 animate-pulse rounded-full bg-white/50" />
+        <div className="mt-4 h-4 w-1/2 animate-pulse rounded-full bg-white/40" />
       </main>
     )
   }
@@ -45,7 +45,7 @@ export function SalonDetailPage() {
               key={url}
               src={url}
               alt={salon.name}
-              className="h-48 w-72 shrink-0 rounded-2xl object-cover sm:h-64 sm:w-96"
+              className="h-48 w-72 shrink-0 rounded-3xl object-cover shadow-sm sm:h-64 sm:w-96"
             />
           ))}
         </div>
@@ -55,7 +55,7 @@ export function SalonDetailPage() {
       <header className="mb-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
+            <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
               {salon.name}
             </h1>
             <p className="mt-2 flex items-center gap-1 text-sm text-ink-secondary">
@@ -75,7 +75,7 @@ export function SalonDetailPage() {
               </p>
             )}
           </div>
-          <span className="flex items-center gap-1 rounded-lg border border-line bg-card px-3 py-2 text-sm">
+          <span className="glass flex items-center gap-1 rounded-full px-4 py-2 text-sm">
             <Star aria-hidden className="size-4 fill-warning text-warning" />
             <span className="font-semibold text-ink">{salon.ratingAvg.toFixed(1)}</span>
             <span className="text-ink-muted">({salon.ratingCount} отзива)</span>
@@ -90,7 +90,7 @@ export function SalonDetailPage() {
       <section className="space-y-6">
         <h2 className="text-lg font-semibold text-ink">Услуги</h2>
         {salon.serviceGroups.map((group) => (
-          <div key={group.categoryId} className="rounded-2xl border border-line bg-card p-4 sm:p-6">
+          <div key={group.categoryId} className="glass rounded-3xl p-5 sm:p-6">
             <h3 className="mb-4 font-semibold text-ink">{group.categoryName}</h3>
             <ul className="divide-y divide-line">
               {group.services.map((service) => (
