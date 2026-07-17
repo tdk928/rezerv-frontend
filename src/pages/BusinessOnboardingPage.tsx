@@ -3,29 +3,23 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
-import {
-  createCompany,
-  createSalon,
-  createSalonPhoto,
-  createSalonService,
-} from '../api/businessOnboarding'
-import { getCategories, getCities } from '../api/business'
+import { createCompany, createSalon } from '../api/businessOnboarding'
+import { getCities } from '../api/business'
 import { ApiError } from '../api/http'
 import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
 import { FieldError, inputClasses, labelClasses } from '../features/auth/AuthCard'
 import {
   companySchema,
-  photoSchema,
   salonSchema,
-  serviceSchema,
   type CompanyFormValues,
-  type PhotoFormValues,
   type SalonFormValues,
-  type ServiceFormValues,
 } from '../features/business/onboardingSchemas'
 
-const STEPS = ['Фирма', 'Салон', 'Услуга', 'Снимка'] as const
+const STEPS = ['Фирма', 'Обект', 'Условия', 'Подпис'] as const
+
+const TERMS_LOREM =
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
 
 function serverErrorMessage(error: unknown): string | null {
   if (error instanceof ApiError) return error.message
@@ -38,11 +32,9 @@ export function BusinessOnboardingPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [companyId, setCompanyId] = useState<number | null>(null)
-  const [salonId, setSalonId] = useState<number | null>(null)
   const [doneMessage, setDoneMessage] = useState<string | null>(null)
 
   const citiesQuery = useQuery({ queryKey: ['cities'], queryFn: getCities })
-  const categoriesQuery = useQuery({ queryKey: ['categories'], queryFn: getCategories })
 
   if (doneMessage !== null) {
     return (
@@ -88,31 +80,16 @@ export function BusinessOnboardingPage() {
             companyId={companyId}
             cities={citiesQuery.data ?? []}
             citiesLoading={citiesQuery.isLoading}
-            onSuccess={(id) => {
-              setSalonId(id)
-              setStep(2)
-            }}
+            onSuccess={() => setStep(2)}
           />
         )}
-        {step === 2 && accessToken !== null && salonId !== null && (
-          <ServiceStep
-            accessToken={accessToken}
-            salonId={salonId}
-            categories={categoriesQuery.data ?? []}
-            categoriesLoading={categoriesQuery.isLoading}
-            onSuccess={() => setStep(3)}
-            onSkip={() => setStep(3)}
-          />
-        )}
-        {step === 3 && accessToken !== null && salonId !== null && (
-          <PhotoStep
-            accessToken={accessToken}
-            salonId={salonId}
-            onSuccess={() =>
-              setDoneMessage('Фирмата, салонът и услугите са регистрирани. Очаква одобрение от администратор.')
-            }
-            onSkip={() =>
-              setDoneMessage('Фирмата и салонът са регистрирани. Можете да добавите снимки по-късно.')
+        {step === 2 && <TermsStep onContinue={() => setStep(3)} />}
+        {step === 3 && (
+          <SignStep
+            onComplete={() =>
+              setDoneMessage(
+                'Фирмата и обектът са регистрирани. Услуги и снимки можете да добавите от администрацията. Очаква одобрение от администратор.',
+              )
             }
           />
         )}
@@ -185,7 +162,7 @@ function SalonStep({
   companyId: number
   cities: { id: number; name: string }[]
   citiesLoading: boolean
-  onSuccess: (salonId: number) => void
+  onSuccess: () => void
 }) {
   const {
     register,
@@ -203,7 +180,7 @@ function SalonStep({
         email: values.email,
         phone: values.phone,
       }),
-    onSuccess: (salon) => onSuccess(salon.id),
+    onSuccess: () => onSuccess(),
   })
 
   const serverError = serverErrorMessage(mutation.error)
@@ -212,7 +189,7 @@ function SalonStep({
     <form onSubmit={handleSubmit((values) => mutation.mutate(values))} noValidate>
       <div className="mb-4">
         <label htmlFor="salonName" className={labelClasses}>
-          Име на салона
+          Име на обекта
         </label>
         <input id="salonName" className={inputClasses} {...register('name')} />
         <FieldError message={errors.name?.message} />
@@ -274,149 +251,53 @@ function SalonStep({
   )
 }
 
-function ServiceStep({
-  accessToken,
-  salonId,
-  categories,
-  categoriesLoading,
-  onSuccess,
-  onSkip,
-}: {
-  accessToken: string
-  salonId: number
-  categories: { id: number; name: string }[]
-  categoriesLoading: boolean
-  onSuccess: () => void
-  onSkip: () => void
-}) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ServiceFormValues>({ resolver: zodResolver(serviceSchema) })
-
-  const mutation = useMutation({
-    mutationFn: (values: ServiceFormValues) =>
-      createSalonService(accessToken, salonId, {
-        categoryId: Number(values.categoryId),
-        name: values.name,
-        durationMin: Number(values.durationMin),
-        price: Number(values.price),
-      }),
-    onSuccess: () => onSuccess(),
-  })
-
-  const serverError = serverErrorMessage(mutation.error)
-
+function TermsStep({ onContinue }: { onContinue: () => void }) {
   return (
-    <form onSubmit={handleSubmit((values) => mutation.mutate(values))} noValidate>
-      <div className="mb-4">
-        <label htmlFor="categoryId" className={labelClasses}>
-          Категория
-        </label>
-        <select
-          id="categoryId"
-          className={inputClasses}
-          disabled={categoriesLoading}
-          {...register('categoryId')}
+    <div>
+      <h2 className="mb-3 text-lg font-semibold text-ink">Общи условия</h2>
+      <p className="mb-6 text-sm leading-relaxed text-ink-secondary">{TERMS_LOREM}</p>
+
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row">
+        <button
+          type="button"
+          className="rounded-lg border border-line bg-surface px-4 py-2.5 text-sm text-ink-secondary transition-colors hover:border-brand hover:text-ink"
+          onClick={() => undefined}
         >
-          <option value="">Изберете категория</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        <FieldError message={errors.categoryId?.message} />
+          Общи условия
+        </button>
+        <button
+          type="button"
+          className="rounded-lg border border-line bg-surface px-4 py-2.5 text-sm text-ink-secondary transition-colors hover:border-brand hover:text-ink"
+          onClick={() => undefined}
+        >
+          Договор за ползване
+        </button>
       </div>
-      <div className="mb-4">
-        <label htmlFor="serviceName" className={labelClasses}>
-          Име на услугата
-        </label>
-        <input id="serviceName" className={inputClasses} {...register('name')} />
-        <FieldError message={errors.name?.message} />
-      </div>
-      <div className="mb-4 grid grid-cols-2 gap-3">
-        <div>
-          <label htmlFor="durationMin" className={labelClasses}>
-            Продължителност (мин)
-          </label>
-          <input id="durationMin" type="number" min={1} className={inputClasses} {...register('durationMin')} />
-          <FieldError message={errors.durationMin?.message} />
-        </div>
-        <div>
-          <label htmlFor="price" className={labelClasses}>
-            Цена (лв.)
-          </label>
-          <input id="price" type="number" min={0} step="0.01" className={inputClasses} {...register('price')} />
-          <FieldError message={errors.price?.message} />
-        </div>
-      </div>
-      {serverError && (
-        <p className="mb-4 rounded-lg bg-brand-soft px-3 py-2 text-sm text-danger">{serverError}</p>
-      )}
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Button type="button" variant="secondary" className="flex-1" onClick={onSkip}>
-          Пропусни
-        </Button>
-        <Button type="submit" className="flex-1" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Добавяне…' : 'Продължи'}
-        </Button>
-      </div>
-    </form>
+
+      <p className="mb-6 text-xs text-ink-muted">
+        PDF документите ще бъдат налични скоро. Продължете към електронния подпис.
+      </p>
+
+      <Button type="button" className="w-full" onClick={onContinue}>
+        Продължи
+      </Button>
+    </div>
   )
 }
 
-function PhotoStep({
-  accessToken,
-  salonId,
-  onSuccess,
-  onSkip,
-}: {
-  accessToken: string
-  salonId: number
-  onSuccess: () => void
-  onSkip: () => void
-}) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<PhotoFormValues>({
-    resolver: zodResolver(photoSchema),
-    defaultValues: { url: 'https://picsum.photos/800/600' },
-  })
-
-  const mutation = useMutation({
-    mutationFn: (values: PhotoFormValues) => createSalonPhoto(accessToken, salonId, values),
-    onSuccess: () => onSuccess(),
-  })
-
-  const serverError = serverErrorMessage(mutation.error)
-
+function SignStep({ onComplete }: { onComplete: () => void }) {
   return (
-    <form onSubmit={handleSubmit((values) => mutation.mutate(values))} noValidate>
-      <p className="mb-4 text-sm text-ink-secondary">
-        Добавете URL на снимка за салона (можете да ползвате picsum.photos за тест).
+    <div>
+      <h2 className="mb-3 text-lg font-semibold text-ink">Електронен подпис</h2>
+      <p className="mb-6 text-sm leading-relaxed text-ink-secondary">
+        С натискане на бутона потвърждавате, че сте запознати с общите условия и договора за
+        ползване на платформата REZERV. Интеграцията с Borica / Evrotrust ще бъде добавена на
+        следващ етап.
       </p>
-      <div className="mb-6">
-        <label htmlFor="url" className={labelClasses}>
-          URL на снимка
-        </label>
-        <input id="url" type="url" className={inputClasses} {...register('url')} />
-        <FieldError message={errors.url?.message} />
-      </div>
-      {serverError && (
-        <p className="mb-4 rounded-lg bg-brand-soft px-3 py-2 text-sm text-danger">{serverError}</p>
-      )}
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <Button type="button" variant="secondary" className="flex-1" onClick={onSkip}>
-          Пропусни
-        </Button>
-        <Button type="submit" className="flex-1" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Качване…' : 'Завърши'}
-        </Button>
-      </div>
-    </form>
+
+      <Button type="button" className="w-full" onClick={onComplete}>
+        Подпиши и завърши
+      </Button>
+    </div>
   )
 }
