@@ -7,6 +7,8 @@ describe('onboardingSchemas', () => {
       eik: '131529327',
       name: 'Тест',
       legalName: 'Test EOOD',
+      email: 'office@test.bg',
+      phone: '+359888',
     })
     expect(result.success).toBe(true)
   })

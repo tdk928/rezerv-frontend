@@ -1,32 +1,24 @@
 ---
-description: Дизайн система за rezerv-frontend (тъмна тема, зададена от собственика)
+description: Дизайн система за rezerv-frontend (мека тъмна тема + gradient)
 alwaysApply: true
 ---
 
-# Дизайн система — тъмна тема с преливащи gradient акценти
+# Дизайн система — мека тъмна тема с gradient акценти
 
-> ПЪЛНАТА спецификация (компонентни рецепти, layout patterns, do/don't) е в
-> **`docs/DESIGN.md`** — чети я ЗАДЪЛЖИТЕЛНО преди да правиш нов екран/компонент.
+> Пълна спецификация: **`docs/DESIGN.md`**.
 
-Темата е ТЪМНА: черен фон + gradient текст/акценти (синьо → лилаво → розово → оранжево).
-Токените са в `src/index.css` (`@theme`):
+Токени в `src/index.css`:
 
-- Фон surface `#000000`; карти card `#101014`; бордер line `#27272e`
-- Текст ink `#f4f4f5` / secondary `#a1a1aa` / muted `#63636e`
-- Brand (плътен) violet `#a855f7`, hover `#9333ea`, soft фон `#1b1226`
-- Gradient стопове: blue `#3b82f6` → violet `#a855f7` → pink `#ec4899` → orange `#f97316`
-- Статуси: success `#34d399`, warning `#fbbf24`, danger `#ef4444`
+- Фон `surface` `#0c0a14` (не чисто черно); карти `card` `#181526`; `line` `#342e45`
+- Текст `ink` `#faf8ff` / secondary `#c4b5d4` / muted `#8b7a9e`
+- Brand `#c084fc`; soft `#241536`
+- Gradient: blue `#60a5fa` → violet `#c084fc` → pink `#f472b6` → orange `#fb923c`
+- Ambient glow на `body` (radial gradients) — не махай без причина
 
-Utilities (дефинирани в `index.css`):
+Utilities:
 
-- `text-gradient` — преливащ текст (лого „Rezerv", заглавия/акценти)
-- `bg-gradient-brand` — преливащ фон (primary бутони)
+- `text-gradient` — лого / hero
+- `text-gradient-soft` — секционни заглавия, auth subtitle
+- `bg-gradient-brand` — primary бутони
 
-Правила:
-
-- ВСИЧКО е responsive — mobile-first, десктоп с `sm:`/`md:`/`lg:` breakpoints.
-- Карти: `rounded-2xl` с `border border-line`. Бутони: `rounded-lg`.
-- Използвай общия `Button` компонент (primary/secondary/ghost/danger) — не пиши ad-hoc бутони.
-- Loading: skeleton loaders, не голи спинъри.
-- Цветовете се реферират през theme токените, не с хардкоднати hex стойности в className.
-- Навигация: sticky Navbar (лого „Rezerv" вляво → `/`; вдясно Вход/Регистрация или Изход).
+Правила: mobile-first; `Button` компоненти; токени вместо hex; skeleton loading.

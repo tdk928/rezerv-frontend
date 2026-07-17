@@ -8,9 +8,35 @@ export interface CompanyResponse {
   eik: string
   name: string
   legalName: string
+  email: string
+  phone: string
   ownerUserId: number
   status: string
   createdAt: string
+}
+
+export interface CompanyWithSalonsResponse extends CompanyResponse {
+  salons: SalonResponse[]
+}
+
+export interface OwnerSummary {
+  id: number
+  email: string | null
+  firstName: string | null
+  lastName: string | null
+}
+
+export interface AdminCompanyResponse {
+  id: number
+  eik: string
+  name: string
+  legalName: string
+  email: string
+  phone: string
+  status: string
+  createdAt: string
+  updatedAt: string
+  owner: OwnerSummary
 }
 
 export interface SalonResponse {
@@ -48,6 +74,8 @@ export interface CreateCompanyRequest {
   eik: string
   name: string
   legalName: string
+  email: string
+  phone: string
 }
 
 export interface CreateSalonRequest {
@@ -80,8 +108,19 @@ export function createCompany(
   return postAuth<CompanyResponse>('/business/companies', request, accessToken)
 }
 
-export function listMyCompanies(accessToken: string): Promise<CompanyResponse[]> {
-  return getAuth<CompanyResponse[]>('/business/companies/mine', accessToken)
+export function listMyCompanies(accessToken: string): Promise<CompanyWithSalonsResponse[]> {
+  return getAuth<CompanyWithSalonsResponse[]>('/business/companies/mine', accessToken)
+}
+
+export function listAdminCompanies(accessToken: string): Promise<AdminCompanyResponse[]> {
+  return getAuth<AdminCompanyResponse[]>('/business/admin/companies', accessToken)
+}
+
+export function approveCompany(
+  accessToken: string,
+  companyId: number,
+): Promise<AdminCompanyResponse> {
+  return postAuth<AdminCompanyResponse>(`/business/admin/companies/${companyId}/approve`, {}, accessToken)
 }
 
 export function createSalon(
