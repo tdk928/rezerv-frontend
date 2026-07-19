@@ -6,6 +6,7 @@
 
 | # | Бранч | Обобщение |
 |---|-------|-----------|
+| 12 | feature/staff-management-ui | Моите обекти: служители по email (CAS STAFF) + абонамент за услуги (checkboxes). |
 | 11 | feature/salon-working-hours-ui | Добавяне на обект: checkboxes за дни + open/close (default пн–пет 09–18); `workingHours` в create salon API. |
 | 10 | feature/my-salons-page | `/business/salons` — „Моите обекти“ от APPROVED фирми (reuse `companies/mine`). Sidebar линк. |
 | 9 | feature/liquid-glass-ui | Цял UI → Apple Liquid Glass: светла тема, frosted `glass` панели, pill бутони, Apple blue, mesh ambient фон. |

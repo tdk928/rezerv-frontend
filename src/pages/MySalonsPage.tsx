@@ -5,11 +5,15 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
 import { getCategories } from '../api/business'
 import {
+  addSalonStaff,
   createSalonService,
   listMyCompanies,
+  listSalonStaff,
   removeSalonService,
+  replaceStaffServices,
   type SalonResponse,
   type SalonServiceResponse,
+  type StaffMemberResponse,
 } from '../api/businessOnboarding'
 import { ApiError } from '../api/http'
 import { useAuth } from '../auth/AuthContext'
@@ -210,11 +214,214 @@ export function MySalonsPage() {
                   </div>
                 )}
               </div>
+
+              {accessToken ? (
+                <StaffSection
+                  accessToken={accessToken}
+                  salonId={salon.id}
+                  services={services}
+                />
+              ) : null}
             </li>
           )
         })}
       </ul>
     </main>
+  )
+}
+
+function StaffSection({
+  accessToken,
+  salonId,
+  services,
+}: {
+  accessToken: string
+  salonId: number
+  services: SalonServiceResponse[]
+}) {
+  const queryClient = useQueryClient()
+  const [email, setEmail] = useState('')
+  const [title, setTitle] = useState('')
+  const [showForm, setShowForm] = useState(false)
+
+  const staffQuery = useQuery({
+    queryKey: ['salon-staff', salonId],
+    queryFn: () => listSalonStaff(accessToken, salonId),
+  })
+
+  const addMutation = useMutation({
+    mutationFn: () =>
+      addSalonStaff(accessToken, salonId, {
+        email: email.trim(),
+        title: title.trim() || undefined,
+      }),
+    onSuccess: async () => {
+      setEmail('')
+      setTitle('')
+      setShowForm(false)
+      await queryClient.invalidateQueries({ queryKey: ['salon-staff', salonId] })
+    },
+  })
+
+  return (
+    <div className="mt-5 border-t border-line pt-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-ink-secondary">Служители</h3>
+        {showForm ? (
+          <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>
+            Отказ
+          </Button>
+        ) : (
+          <Button type="button" onClick={() => setShowForm(true)}>
+            + Добави служител
+          </Button>
+        )}
+      </div>
+
+      <p className="mb-3 text-xs text-ink-muted">
+        Служителят трябва вече да има акаунт (регистрация). Въведете email-а му — получава роля STAFF.
+      </p>
+
+      {staffQuery.isLoading ? (
+        <p className="text-sm text-ink-muted">Зареждане…</p>
+      ) : (staffQuery.data?.length ?? 0) === 0 && !showForm ? (
+        <p className="text-sm text-ink-muted">Няма добавени служители.</p>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {(staffQuery.data ?? []).map((member) => (
+            <StaffRow
+              key={member.id}
+              member={member}
+              services={services}
+              accessToken={accessToken}
+              salonId={salonId}
+            />
+          ))}
+        </ul>
+      )}
+
+      {showForm && (
+        <form
+          className="glass-strong mt-4 space-y-3 rounded-3xl p-4"
+          onSubmit={(e) => {
+            e.preventDefault()
+            addMutation.mutate()
+          }}
+        >
+          <div>
+            <label className={labelClasses} htmlFor={`staff-email-${salonId}`}>
+              Email на акаунта
+            </label>
+            <input
+              id={`staff-email-${salonId}`}
+              type="email"
+              required
+              className={inputClasses}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className={labelClasses} htmlFor={`staff-title-${salonId}`}>
+              Длъжност (опционално)
+            </label>
+            <input
+              id={`staff-title-${salonId}`}
+              className={inputClasses}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="напр. Гримьор"
+            />
+          </div>
+          {addMutation.error ? (
+            <p className="rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">
+              {serverErrorMessage(addMutation.error)}
+            </p>
+          ) : null}
+          <Button type="submit" disabled={addMutation.isPending || !email.trim()}>
+            {addMutation.isPending ? 'Добавяне…' : 'Добави'}
+          </Button>
+        </form>
+      )}
+    </div>
+  )
+}
+
+function StaffRow({
+  member,
+  services,
+  accessToken,
+  salonId,
+}: {
+  member: StaffMemberResponse
+  services: SalonServiceResponse[]
+  accessToken: string
+  salonId: number
+}) {
+  const queryClient = useQueryClient()
+  const [selected, setSelected] = useState<number[]>(member.serviceIds)
+
+  const saveServices = useMutation({
+    mutationFn: () => replaceStaffServices(accessToken, member.id, selected),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['salon-staff', salonId] })
+    },
+  })
+
+  return (
+    <li className="rounded-2xl bg-white/45 px-3 py-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <p className="text-sm font-semibold text-ink">{member.displayName}</p>
+          {member.title ? <p className="text-xs text-ink-muted">{member.title}</p> : null}
+        </div>
+        <span className="text-xs text-ink-muted">
+          {member.workingHours.length > 0
+            ? `${member.workingHours.length} работни дни`
+            : 'без собствен график'}
+        </span>
+      </div>
+
+      {services.length > 0 ? (
+        <div className="mt-3">
+          <p className="mb-2 text-xs font-medium text-ink-secondary">Услуги, които извършва</p>
+          <ul className="flex flex-col gap-1.5">
+            {services.map((service) => {
+              const checked = selected.includes(service.id)
+              return (
+                <li key={service.id}>
+                  <label className="flex items-center gap-2 text-sm text-ink">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() =>
+                        setSelected((prev) =>
+                          checked ? prev.filter((id) => id !== service.id) : [...prev, service.id],
+                        )
+                      }
+                    />
+                    {service.name}
+                  </label>
+                </li>
+              )
+            })}
+          </ul>
+          <Button
+            type="button"
+            className="mt-2"
+            disabled={saveServices.isPending}
+            onClick={() => saveServices.mutate()}
+          >
+            {saveServices.isPending ? 'Запазване…' : 'Запази услуги'}
+          </Button>
+          {saveServices.error ? (
+            <p className="mt-2 text-sm text-danger">{serverErrorMessage(saveServices.error)}</p>
+          ) : null}
+        </div>
+      ) : (
+        <p className="mt-2 text-xs text-ink-muted">Добавете услуги към обекта, за да абонирате служителя.</p>
+      )}
+    </li>
   )
 }
 
