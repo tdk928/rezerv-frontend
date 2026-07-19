@@ -16,6 +16,9 @@
 - Apple system blue `#0071e3` вместо предишния dark purple rainbow
 - SF / `-apple-system` нарочно за автентичен Apple look
 
+## Допълнително
+- „+ Добави обект“ disabled до APPROVED; muted + без hover; dual chrome (top auth / left sidebar)
+
 ## Как се тества
 ```bash
 npm test -- --run

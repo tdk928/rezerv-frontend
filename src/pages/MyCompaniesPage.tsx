@@ -77,9 +77,10 @@ export function MyCompaniesPage() {
             company={company}
             accessToken={accessToken!}
             isAdding={addingForCompanyId === company.id}
-            onToggleAdd={() =>
+            onToggleAdd={() => {
+              if (company.status !== 'APPROVED') return
               setAddingForCompanyId((id) => (id === company.id ? null : company.id))
-            }
+            }}
             onSalonAdded={() => setAddingForCompanyId(null)}
           />
         ))}
@@ -101,6 +102,9 @@ function CompanyCard({
   onToggleAdd: () => void
   onSalonAdded: () => void
 }) {
+  const canAddSalon = company.status === 'APPROVED'
+  const showAddForm = isAdding && canAddSalon
+
   return (
     <li className="glass rounded-3xl p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -135,14 +139,24 @@ function CompanyCard({
       <div className="mt-5 border-t border-line pt-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-semibold text-ink-secondary">Обекти</h3>
-          {isAdding ? (
+          {showAddForm ? (
             <Button type="button" variant="ghost" onClick={onToggleAdd}>
               Отказ
             </Button>
           ) : (
             <Button
               type="button"
-              className="!bg-success px-5 py-2.5 text-sm text-white shadow-md shadow-success/30 hover:!bg-success hover:!opacity-90"
+              className={
+                canAddSalon
+                  ? '!bg-success px-5 py-2.5 text-sm text-white shadow-md shadow-success/30 enabled:hover:!bg-success enabled:hover:!opacity-90'
+                  : '!bg-ink-muted/25 !text-ink-muted !shadow-none px-5 py-2.5 text-sm'
+              }
+              disabled={!canAddSalon}
+              title={
+                canAddSalon
+                  ? undefined
+                  : 'Обекти могат да се добавят само след одобрение на фирмата'
+              }
               onClick={onToggleAdd}
             >
               + Добави обект
@@ -150,7 +164,13 @@ function CompanyCard({
           )}
         </div>
 
-        {company.salons.length === 0 && !isAdding ? (
+        {!canAddSalon && (
+          <p className="mb-3 text-xs text-ink-muted">
+            Обекти се добавят след като фирмата бъде одобрена.
+          </p>
+        )}
+
+        {company.salons.length === 0 && !showAddForm ? (
           <p className="text-sm text-ink-muted">Няма добавени обекти.</p>
         ) : (
           <ul className="flex flex-col gap-2">
@@ -173,7 +193,7 @@ function CompanyCard({
           </ul>
         )}
 
-        {isAdding && (
+        {showAddForm && (
           <div className="glass-strong mt-4 rounded-3xl p-4 sm:p-5">
             <h4 className="mb-4 text-sm font-semibold text-ink">Нов обект</h4>
             <AddSalonForm

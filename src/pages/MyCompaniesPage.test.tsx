@@ -84,6 +84,44 @@ describe('MyCompaniesPage', () => {
     expect(screen.getByText('Регистрирана')).toBeInTheDocument()
     expect(screen.getByText('Обект Център')).toBeInTheDocument()
     expect(screen.getByText(/Чака одобрение/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '+ Добави обект' })).toBeDisabled()
+  })
+
+  it('не отваря форма за обект при неодобрена фирма', async () => {
+    const user = userEvent.setup()
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, 'refresh-token')
+    vi.mocked(authApi.refresh).mockResolvedValue(
+      makeAuthResponse({
+        user: {
+          ...makeAuthResponse().user,
+          companyId: 10,
+          companyIds: [10],
+          roles: ['BUSINESS_OWNER', 'CLIENT'],
+        },
+      }),
+    )
+    vi.mocked(listMyCompanies).mockResolvedValue([
+      {
+        id: 10,
+        eik: '131529327',
+        name: 'Тест ООД',
+        legalName: 'Test OOD',
+        email: 'office@test.bg',
+        phone: '+359888',
+        ownerUserId: 1,
+        status: 'PENDING_APPROVAL',
+        createdAt: '2026-07-17T00:00:00Z',
+        salons: [],
+      },
+    ])
+
+    renderApp('/business/companies')
+    await screen.findByText('Тест ООД')
+
+    const addBtn = screen.getByRole('button', { name: '+ Добави обект' })
+    expect(addBtn).toBeDisabled()
+    await user.click(addBtn)
+    expect(screen.queryByLabelText('Име на обекта')).not.toBeInTheDocument()
   })
 
   it('добавя обект през формата', async () => {

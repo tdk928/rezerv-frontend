@@ -4,13 +4,13 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'bg-brand text-white shadow-sm shadow-brand/25 hover:bg-brand-hover hover:shadow-md hover:shadow-brand/30 active:scale-[0.98] disabled:opacity-40',
+    'bg-brand text-white shadow-sm shadow-brand/25 enabled:hover:bg-brand-hover enabled:hover:shadow-md enabled:hover:shadow-brand/30 enabled:active:scale-[0.98] disabled:opacity-40',
   secondary:
-    'glass text-ink hover:bg-white/80 disabled:text-ink-muted',
+    'glass text-ink enabled:hover:bg-white/80 disabled:text-ink-muted disabled:opacity-50',
   ghost:
-    'bg-transparent text-ink-secondary hover:bg-white/50 hover:text-ink disabled:text-ink-muted',
+    'bg-transparent text-ink-secondary enabled:hover:bg-white/50 enabled:hover:text-ink disabled:text-ink-muted disabled:opacity-50',
   danger:
-    'bg-danger text-white shadow-sm hover:opacity-90 active:scale-[0.98] disabled:opacity-40',
+    'bg-danger text-white shadow-sm enabled:hover:opacity-90 enabled:active:scale-[0.98] disabled:opacity-40',
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -21,7 +21,7 @@ export function Button({ variant = 'primary', className = '', type = 'button', .
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold tracking-tight transition-all duration-200 disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold tracking-tight transition-all duration-200 disabled:pointer-events-none disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`}
       {...props}
     />
   )
