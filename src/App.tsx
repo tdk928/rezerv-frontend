@@ -9,6 +9,7 @@ import { LoginPage } from './pages/LoginPage'
 import { MyCompaniesPage } from './pages/MyCompaniesPage'
 import { MySalonsPage } from './pages/MySalonsPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { BookAppointmentPage } from './pages/BookAppointmentPage'
 import { SalonDetailPage } from './pages/SalonDetailPage'
 import { SalonsPage } from './pages/SalonsPage'
 import { StatusPage } from './pages/StatusPage'
@@ -20,6 +21,7 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/salons" element={<SalonsPage />} />
         <Route path="/salons/:id" element={<SalonDetailPage />} />
+        <Route path="/salons/:id/book" element={<BookAppointmentPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/status" element={<StatusPage />} />
