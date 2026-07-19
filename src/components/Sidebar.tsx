@@ -1,4 +1,4 @@
-import { Building2, Home, PlusCircle, Shield } from 'lucide-react'
+import { Building2, Home, PlusCircle, Shield, Store } from 'lucide-react'
 import { NavLink } from 'react-router'
 import { useAuth } from '../auth/AuthContext'
 
@@ -29,6 +29,7 @@ export function Sidebar() {
   const businessItems: NavItem[] = []
   if (isAuthenticated && hasCompany) {
     businessItems.push({ to: '/business/companies', label: 'Моите фирми', icon: Building2 })
+    businessItems.push({ to: '/business/salons', label: 'Моите обекти', icon: Store })
   }
   if (isAdmin) {
     businessItems.push({ to: '/admin/companies', label: 'Всички фирми', icon: Shield })
