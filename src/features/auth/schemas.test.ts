@@ -31,8 +31,8 @@ describe('registerSchema', () => {
     expect(registerSchema.safeParse(valid).success).toBe(true)
   })
 
-  it('приема празен телефон (по избор)', () => {
-    expect(registerSchema.safeParse({ ...valid, phone: '' }).success).toBe(true)
+  it('отхвърля празен телефон', () => {
+    expect(registerSchema.safeParse({ ...valid, phone: '' }).success).toBe(false)
   })
 
   it('отхвърля парола под 8 символа', () => {

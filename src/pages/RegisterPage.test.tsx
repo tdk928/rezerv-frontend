@@ -27,6 +27,7 @@ async function fillForm() {
   await userEvent.type(screen.getByLabelText('Име'), 'Мария')
   await userEvent.type(screen.getByLabelText('Фамилия'), 'Петрова')
   await userEvent.type(screen.getByLabelText('Email'), 'maria@example.bg')
+  await userEvent.type(screen.getByLabelText('Телефон'), '0888123456')
   await userEvent.type(screen.getByLabelText('Парола'), 'secret123')
 }
 
@@ -48,7 +49,7 @@ describe('RegisterPage', () => {
     expect(authApi.register).not.toHaveBeenCalled()
   })
 
-  it('при успешна регистрация редиректва към /; празен телефон не се праща', async () => {
+  it('при успешна регистрация редиректва към /', async () => {
     vi.mocked(authApi.register).mockResolvedValue(authResponse)
     renderApp('/register')
 
@@ -64,8 +65,14 @@ describe('RegisterPage', () => {
       password: 'secret123',
       firstName: 'Мария',
       lastName: 'Петрова',
-      phone: undefined,
+      phone: '0888123456',
     })
+  })
+
+  it('изисква телефон при празна форма', async () => {
+    renderApp('/register')
+    await userEvent.click(screen.getByRole('button', { name: 'Регистрирай се' }))
+    expect(await screen.findByText('Телефонът е задължителен')).toBeInTheDocument()
   })
 
   it('показва грешката при зает email (409)', async () => {

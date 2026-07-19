@@ -34,7 +34,7 @@ export interface RegisterRequest {
   password: string
   firstName: string
   lastName: string
-  phone?: string
+  phone: string
 }
 
 export function login(request: LoginRequest): Promise<AuthResponse> {

@@ -198,6 +198,24 @@ export function addSalonStaff(
   return postAuth<StaffMemberResponse>(`/business/salons/${salonId}/staff`, request, accessToken)
 }
 
+export interface CreateStaffRequest {
+  email: string
+  password: string
+  firstName: string
+  lastName: string
+  phone: string
+  displayName?: string
+  title?: string
+}
+
+export function createSalonStaff(
+  accessToken: string,
+  salonId: number,
+  request: CreateStaffRequest,
+): Promise<StaffMemberResponse> {
+  return postAuth<StaffMemberResponse>(`/business/salons/${salonId}/staff/create`, request, accessToken)
+}
+
 export function replaceStaffServices(
   accessToken: string,
   staffId: number,
