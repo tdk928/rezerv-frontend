@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { Clock, Mail, MapPin, Phone, Star } from 'lucide-react'
 import { getSalon } from '../api/business'
 import { Button } from '../components/ui/Button'
@@ -8,6 +8,8 @@ import { formatEuro } from '../lib/formatEuro'
 export function SalonDetailPage() {
   const { id } = useParams<{ id: string }>()
   const salonId = Number(id)
+  const [searchParams] = useSearchParams()
+  const justBooked = searchParams.get('booked') === '1'
 
   const { data: salon, isLoading, isError } = useQuery({
     queryKey: ['salon', salonId],
@@ -38,6 +40,12 @@ export function SalonDetailPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+      {justBooked ? (
+        <p className="mb-6 rounded-3xl bg-success/15 px-4 py-3 text-sm font-medium text-ink">
+          Часът е запазен успешно.
+        </p>
+      ) : null}
+
       {/* Галерия */}
       {salon.photos.length > 0 && (
         <div className="mb-8 flex gap-3 overflow-x-auto pb-2">
@@ -108,9 +116,9 @@ export function SalonDetailPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="font-semibold text-ink">{formatEuro(service.price)} €</span>
-                    <Button className="shrink-0" disabled title="Резервацията идва скоро">
-                      Запази
-                    </Button>
+                    <Link to={`/salons/${salon.id}/book?serviceId=${service.id}`}>
+                      <Button className="shrink-0">Запази</Button>
+                    </Link>
                   </div>
                 </li>
               ))}

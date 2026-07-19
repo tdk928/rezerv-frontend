@@ -6,6 +6,7 @@
 
 | # | Бранч | Обобщение |
 |---|-------|-----------|
+| 13 | feature/booking-calendar-ui | `/salons/:id/book` — календар + слотове + резервация (CLIENT). „Запази“ от детайл на салон. |
 | 12 | feature/staff-management-ui | Моите обекти: служители по email (CAS STAFF) + абонамент за услуги (checkboxes). |
 | 11 | feature/salon-working-hours-ui | Добавяне на обект: checkboxes за дни + open/close (default пн–пет 09–18); `workingHours` в create salon API. |
 | 10 | feature/my-salons-page | `/business/salons` — „Моите обекти“ от APPROVED фирми (reuse `companies/mine`). Sidebar линк. |
