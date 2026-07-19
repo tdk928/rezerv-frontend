@@ -1,4 +1,4 @@
-import { deleteAuth, getAuth, postAuth } from './http'
+import { deleteAuth, getAuth, postAuth, putAuth } from './http'
 import type { City } from './business'
 
 /** Protected B2B onboarding — `/api/business/**` с JWT през gateway. */
@@ -167,4 +167,41 @@ export function createSalonPhoto(
   request: CreateSalonPhotoRequest,
 ): Promise<SalonPhotoResponse> {
   return postAuth<SalonPhotoResponse>(`/business/salons/${salonId}/photos`, request, accessToken)
+}
+
+export interface StaffMemberResponse {
+  id: number
+  salonId: number
+  userId: number
+  displayName: string
+  title: string | null
+  active: boolean
+  serviceIds: number[]
+  workingHours: WorkingHoursResponse[]
+}
+
+export interface AddStaffRequest {
+  email: string
+  displayName?: string
+  title?: string
+}
+
+export function listSalonStaff(accessToken: string, salonId: number): Promise<StaffMemberResponse[]> {
+  return getAuth<StaffMemberResponse[]>(`/business/salons/${salonId}/staff`, accessToken)
+}
+
+export function addSalonStaff(
+  accessToken: string,
+  salonId: number,
+  request: AddStaffRequest,
+): Promise<StaffMemberResponse> {
+  return postAuth<StaffMemberResponse>(`/business/salons/${salonId}/staff`, request, accessToken)
+}
+
+export function replaceStaffServices(
+  accessToken: string,
+  staffId: number,
+  serviceIds: number[],
+): Promise<StaffMemberResponse> {
+  return putAuth<StaffMemberResponse>(`/business/staff/${staffId}/services`, { serviceIds }, accessToken)
 }

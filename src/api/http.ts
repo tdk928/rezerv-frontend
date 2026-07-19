@@ -72,6 +72,25 @@ export async function getAuth<TResponse>(path: string, accessToken: string): Pro
   return handle<TResponse>(response)
 }
 
+export async function putAuth<TResponse>(
+  path: string,
+  body: unknown,
+  accessToken: string,
+): Promise<TResponse> {
+  const response = await fetch(`/api${path}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+  })
+  if (response.status === 401) {
+    unauthorizedHandler?.()
+  }
+  return handle<TResponse>(response)
+}
+
 export async function deleteAuth(path: string, accessToken: string): Promise<void> {
   const response = await fetch(`/api${path}`, {
     method: 'DELETE',
