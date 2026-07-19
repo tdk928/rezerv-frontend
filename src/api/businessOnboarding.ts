@@ -50,6 +50,12 @@ export interface SalonServiceResponse {
   active: boolean
 }
 
+export interface WorkingHoursResponse {
+  dayOfWeek: number
+  openTime: string
+  closeTime: string
+}
+
 export interface SalonResponse {
   id: number
   companyId: number
@@ -63,6 +69,7 @@ export interface SalonResponse {
   phone: string
   status: string
   services?: SalonServiceResponse[]
+  workingHours?: WorkingHoursResponse[]
 }
 
 export interface SalonPhotoResponse {
@@ -89,6 +96,11 @@ export interface CreateSalonRequest {
   lng?: number
   email: string
   phone: string
+  workingHours: Array<{
+    dayOfWeek: number
+    openTime: string
+    closeTime: string
+  }>
 }
 
 export interface CreateSalonServiceRequest {

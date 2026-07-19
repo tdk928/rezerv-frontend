@@ -11,15 +11,40 @@ export const companySchema = z.object({
   phone: z.string().trim().min(1, 'Въведете телефон').max(30),
 })
 
+const timeHm = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Невалиден час (ЧЧ:ММ)')
+
 /** Форма за добавяне на обект към съществуваща фирма. */
-export const salonSchema = z.object({
-  name: z.string().trim().min(1, 'Въведете име на обекта').max(200),
-  description: z.string().trim().max(5000).optional().or(z.literal('')),
-  cityId: z.string().min(1, 'Изберете град'),
-  address: z.string().trim().min(1, 'Въведете адрес').max(300),
-  email: z.email('Невалиден email адрес'),
-  phone: z.string().trim().min(1, 'Въведете телефон').max(30),
-})
+export const salonSchema = z
+  .object({
+    name: z.string().trim().min(1, 'Въведете име на обекта').max(200),
+    description: z.string().trim().max(5000).optional().or(z.literal('')),
+    cityId: z.string().min(1, 'Изберете град'),
+    address: z.string().trim().min(1, 'Въведете адрес').max(300),
+    email: z.email('Невалиден email адрес'),
+    phone: z.string().trim().min(1, 'Въведете телефон').max(30),
+    workingHours: z
+      .array(
+        z.object({
+          dayOfWeek: z.number().int().min(1).max(7),
+          openTime: timeHm,
+          closeTime: timeHm,
+        }),
+      )
+      .min(1, 'Изберете поне един работен ден'),
+  })
+  .superRefine((val, ctx) => {
+    for (const day of val.workingHours) {
+      if (day.openTime >= day.closeTime) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['workingHours'],
+          message: `Ден ${day.dayOfWeek}: отварянето трябва да е преди затваряне`,
+        })
+      }
+    }
+  })
 
 /** Форма за добавяне на услуга към обект. */
 export const salonServiceSchema = z.object({

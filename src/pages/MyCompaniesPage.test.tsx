@@ -190,8 +190,14 @@ describe('MyCompaniesPage', () => {
           cityId: 1,
           address: 'ул. Тест 1',
           description: 'Описание',
+          workingHours: expect.arrayContaining([
+            expect.objectContaining({ dayOfWeek: 1, openTime: '09:00', closeTime: '18:00' }),
+            expect.objectContaining({ dayOfWeek: 5, openTime: '09:00', closeTime: '18:00' }),
+          ]),
         }),
       )
     })
+    const payload = vi.mocked(createSalon).mock.calls[0][2]
+    expect(payload.workingHours).toHaveLength(5)
   })
 })

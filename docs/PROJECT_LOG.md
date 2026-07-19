@@ -6,6 +6,7 @@
 
 | # | Бранч | Обобщение |
 |---|-------|-----------|
+| 11 | feature/salon-working-hours-ui | Добавяне на обект: checkboxes за дни + open/close (default пн–пет 09–18); `workingHours` в create salon API. |
 | 10 | feature/my-salons-page | `/business/salons` — „Моите обекти“ от APPROVED фирми (reuse `companies/mine`). Sidebar линк. |
 | 9 | feature/liquid-glass-ui | Цял UI → Apple Liquid Glass: светла тема, frosted `glass` панели, pill бутони, Apple blue, mesh ambient фон. |
 | 8 | feature/my-companies-admin-panel | `/business/companies` — моите фирми+обекти; `/admin/companies` — всички фирми+owners (PLATFORM_ADMIN). RequireRole + Navbar линкове. |
