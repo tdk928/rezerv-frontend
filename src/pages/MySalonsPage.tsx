@@ -7,6 +7,7 @@ import { getCategories } from '../api/business'
 import {
   addSalonStaff,
   createSalonService,
+  createSalonStaff,
   listMyCompanies,
   listSalonStaff,
   removeSalonService,
@@ -230,6 +231,8 @@ export function MySalonsPage() {
   )
 }
 
+type StaffFormMode = 'link' | 'create'
+
 function StaffSection({
   accessToken,
   salonId,
@@ -240,28 +243,67 @@ function StaffSection({
   services: SalonServiceResponse[]
 }) {
   const queryClient = useQueryClient()
-  const [email, setEmail] = useState('')
-  const [title, setTitle] = useState('')
   const [showForm, setShowForm] = useState(false)
+  const [mode, setMode] = useState<StaffFormMode>('create')
+
+  const [linkEmail, setLinkEmail] = useState('')
+  const [linkTitle, setLinkTitle] = useState('')
+
+  const [createEmail, setCreateEmail] = useState('')
+  const [createPassword, setCreatePassword] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [createTitle, setCreateTitle] = useState('')
 
   const staffQuery = useQuery({
     queryKey: ['salon-staff', salonId],
     queryFn: () => listSalonStaff(accessToken, salonId),
   })
 
-  const addMutation = useMutation({
+  function resetForms() {
+    setLinkEmail('')
+    setLinkTitle('')
+    setCreateEmail('')
+    setCreatePassword('')
+    setFirstName('')
+    setLastName('')
+    setPhone('')
+    setCreateTitle('')
+  }
+
+  const linkMutation = useMutation({
     mutationFn: () =>
       addSalonStaff(accessToken, salonId, {
-        email: email.trim(),
-        title: title.trim() || undefined,
+        email: linkEmail.trim(),
+        title: linkTitle.trim() || undefined,
       }),
     onSuccess: async () => {
-      setEmail('')
-      setTitle('')
+      resetForms()
       setShowForm(false)
       await queryClient.invalidateQueries({ queryKey: ['salon-staff', salonId] })
     },
   })
+
+  const createMutation = useMutation({
+    mutationFn: () =>
+      createSalonStaff(accessToken, salonId, {
+        email: createEmail.trim(),
+        password: createPassword,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        phone: phone.trim(),
+        title: createTitle.trim() || undefined,
+      }),
+    onSuccess: async () => {
+      resetForms()
+      setShowForm(false)
+      await queryClient.invalidateQueries({ queryKey: ['salon-staff', salonId] })
+    },
+  })
+
+  const pending = linkMutation.isPending || createMutation.isPending
+  const formError = linkMutation.error ?? createMutation.error
 
   return (
     <div className="mt-5 border-t border-line pt-4">
@@ -272,15 +314,23 @@ function StaffSection({
             Отказ
           </Button>
         ) : (
-          <Button type="button" onClick={() => setShowForm(true)}>
+          <Button
+            type="button"
+            onClick={() => {
+              setMode('create')
+              setShowForm(true)
+            }}
+          >
             + Добави служител
           </Button>
         )}
       </div>
 
-      <p className="mb-3 text-xs text-ink-muted">
-        Служителят трябва вече да има акаунт (регистрация). Въведете email-а му — получава роля STAFF.
-      </p>
+      {!showForm ? (
+        <p className="mb-3 text-xs text-ink-muted">
+          Създайте нов акаунт или свържете съществуващ — служителят получава роля STAFF за фирмата.
+        </p>
+      ) : null}
 
       {staffQuery.isLoading ? (
         <p className="text-sm text-ink-muted">Зареждане…</p>
@@ -301,47 +351,202 @@ function StaffSection({
       )}
 
       {showForm && (
-        <form
-          className="glass-strong mt-4 space-y-3 rounded-3xl p-4"
-          onSubmit={(e) => {
-            e.preventDefault()
-            addMutation.mutate()
-          }}
-        >
-          <div>
-            <label className={labelClasses} htmlFor={`staff-email-${salonId}`}>
-              Email на акаунта
-            </label>
-            <input
-              id={`staff-email-${salonId}`}
-              type="email"
-              required
-              className={inputClasses}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+        <div className="glass-strong mt-4 space-y-4 rounded-3xl p-4 sm:p-5">
+          <div
+            className="flex rounded-full bg-black/[0.05] p-1"
+            role="tablist"
+            aria-label="Начин на добавяне"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'create'}
+              onClick={() => setMode('create')}
+              className={[
+                'flex-1 rounded-full px-3 py-2 text-sm font-semibold transition',
+                mode === 'create'
+                  ? 'bg-white text-ink shadow-sm'
+                  : 'text-ink-secondary hover:text-ink',
+              ].join(' ')}
+            >
+              Създай служител
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'link'}
+              onClick={() => setMode('link')}
+              className={[
+                'flex-1 rounded-full px-3 py-2 text-sm font-semibold transition',
+                mode === 'link'
+                  ? 'bg-white text-ink shadow-sm'
+                  : 'text-ink-secondary hover:text-ink',
+              ].join(' ')}
+            >
+              Съществуващ акаунт
+            </button>
           </div>
-          <div>
-            <label className={labelClasses} htmlFor={`staff-title-${salonId}`}>
-              Длъжност (опционално)
-            </label>
-            <input
-              id={`staff-title-${salonId}`}
-              className={inputClasses}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="напр. Гримьор"
-            />
-          </div>
-          {addMutation.error ? (
-            <p className="rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">
-              {serverErrorMessage(addMutation.error)}
-            </p>
-          ) : null}
-          <Button type="submit" disabled={addMutation.isPending || !email.trim()}>
-            {addMutation.isPending ? 'Добавяне…' : 'Добави'}
-          </Button>
-        </form>
+
+          {mode === 'create' ? (
+            <form
+              className="space-y-3"
+              onSubmit={(e) => {
+                e.preventDefault()
+                createMutation.mutate()
+              }}
+            >
+              <p className="text-xs text-ink-muted">
+                Създава нов login с роли CLIENT + STAFF, свързан с фирмата и този обект.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClasses} htmlFor={`staff-fn-${salonId}`}>
+                    Име
+                  </label>
+                  <input
+                    id={`staff-fn-${salonId}`}
+                    required
+                    className={inputClasses}
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelClasses} htmlFor={`staff-ln-${salonId}`}>
+                    Фамилия
+                  </label>
+                  <input
+                    id={`staff-ln-${salonId}`}
+                    required
+                    className={inputClasses}
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className={labelClasses} htmlFor={`staff-create-email-${salonId}`}>
+                  Email
+                </label>
+                <input
+                  id={`staff-create-email-${salonId}`}
+                  type="email"
+                  required
+                  className={inputClasses}
+                  value={createEmail}
+                  onChange={(e) => setCreateEmail(e.target.value)}
+                  autoComplete="off"
+                />
+              </div>
+              <div>
+                <label className={labelClasses} htmlFor={`staff-pass-${salonId}`}>
+                  Начална парола
+                </label>
+                <input
+                  id={`staff-pass-${salonId}`}
+                  type="password"
+                  required
+                  minLength={8}
+                  className={inputClasses}
+                  value={createPassword}
+                  onChange={(e) => setCreatePassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+                <p className="mt-1 text-xs text-ink-muted">Минимум 8 символа — служителят влиза с нея.</p>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className={labelClasses} htmlFor={`staff-phone-${salonId}`}>
+                    Телефон
+                  </label>
+                  <input
+                    id={`staff-phone-${salonId}`}
+                    type="tel"
+                    required
+                    className={inputClasses}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className={labelClasses} htmlFor={`staff-create-title-${salonId}`}>
+                    Длъжност (опц.)
+                  </label>
+                  <input
+                    id={`staff-create-title-${salonId}`}
+                    className={inputClasses}
+                    value={createTitle}
+                    onChange={(e) => setCreateTitle(e.target.value)}
+                    placeholder="напр. Гримьор"
+                  />
+                </div>
+              </div>
+              {formError && mode === 'create' ? (
+                <p className="rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">
+                  {serverErrorMessage(formError)}
+                </p>
+              ) : null}
+              <Button
+                type="submit"
+                disabled={
+                  pending ||
+                  !createEmail.trim() ||
+                  !firstName.trim() ||
+                  !lastName.trim() ||
+                  !phone.trim() ||
+                  createPassword.length < 8
+                }
+              >
+                {createMutation.isPending ? 'Създаване…' : 'Създай и добави'}
+              </Button>
+            </form>
+          ) : (
+            <form
+              className="space-y-3"
+              onSubmit={(e) => {
+                e.preventDefault()
+                linkMutation.mutate()
+              }}
+            >
+              <p className="text-xs text-ink-muted">
+                Въведете email на вече регистриран потребител — получава роля STAFF.
+              </p>
+              <div>
+                <label className={labelClasses} htmlFor={`staff-email-${salonId}`}>
+                  Email на акаунта
+                </label>
+                <input
+                  id={`staff-email-${salonId}`}
+                  type="email"
+                  required
+                  className={inputClasses}
+                  value={linkEmail}
+                  onChange={(e) => setLinkEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className={labelClasses} htmlFor={`staff-title-${salonId}`}>
+                  Длъжност (опционално)
+                </label>
+                <input
+                  id={`staff-title-${salonId}`}
+                  className={inputClasses}
+                  value={linkTitle}
+                  onChange={(e) => setLinkTitle(e.target.value)}
+                  placeholder="напр. Гримьор"
+                />
+              </div>
+              {formError && mode === 'link' ? (
+                <p className="rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">
+                  {serverErrorMessage(formError)}
+                </p>
+              ) : null}
+              <Button type="submit" disabled={pending || !linkEmail.trim()}>
+                {linkMutation.isPending ? 'Добавяне…' : 'Свържи акаунт'}
+              </Button>
+            </form>
+          )}
+        </div>
       )}
     </div>
   )

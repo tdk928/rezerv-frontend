@@ -26,7 +26,7 @@ export function RegisterPage() {
         password: values.password,
         firstName: values.firstName,
         lastName: values.lastName,
-        phone: values.phone || undefined,
+        phone: values.phone.trim(),
       }),
     onSuccess: (auth) => {
       setSession(auth)
@@ -71,7 +71,7 @@ export function RegisterPage() {
 
         <div className="mb-4">
           <label htmlFor="phone" className={labelClasses}>
-            Телефон (по избор)
+            Телефон
           </label>
           <input id="phone" type="tel" className={inputClasses} {...field('phone')} />
           <FieldError message={errors.phone?.message} />

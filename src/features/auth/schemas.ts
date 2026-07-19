@@ -17,7 +17,7 @@ export const registerSchema = z.object({
     .max(72, 'Паролата трябва да е най-много 72 символа'),
   firstName: z.string().min(1, 'Името е задължително').max(100, 'Най-много 100 символа'),
   lastName: z.string().min(1, 'Фамилията е задължителна').max(100, 'Най-много 100 символа'),
-  phone: z.string().max(32, 'Най-много 32 символа').optional().or(z.literal('')),
+  phone: z.string().trim().min(1, 'Телефонът е задължителен').max(32, 'Най-много 32 символа'),
 })
 
 export type RegisterFormValues = z.infer<typeof registerSchema>
