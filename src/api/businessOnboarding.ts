@@ -1,4 +1,4 @@
-import { getAuth, postAuth } from './http'
+import { deleteAuth, getAuth, postAuth } from './http'
 import type { City } from './business'
 
 /** Protected B2B onboarding — `/api/business/**` с JWT през gateway. */
@@ -39,6 +39,17 @@ export interface AdminCompanyResponse {
   owner: OwnerSummary
 }
 
+export interface SalonServiceResponse {
+  id: number
+  salonId: number
+  categoryId: number
+  categoryName?: string
+  name: string
+  durationMin: number
+  price: number
+  active: boolean
+}
+
 export interface SalonResponse {
   id: number
   companyId: number
@@ -51,16 +62,7 @@ export interface SalonResponse {
   email: string
   phone: string
   status: string
-}
-
-export interface SalonServiceResponse {
-  id: number
-  salonId: number
-  categoryId: number
-  name: string
-  durationMin: number
-  price: number
-  active: boolean
+  services?: SalonServiceResponse[]
 }
 
 export interface SalonPhotoResponse {
@@ -137,6 +139,14 @@ export function createSalonService(
   request: CreateSalonServiceRequest,
 ): Promise<SalonServiceResponse> {
   return postAuth<SalonServiceResponse>(`/business/salons/${salonId}/services`, request, accessToken)
+}
+
+export function removeSalonService(
+  accessToken: string,
+  salonId: number,
+  serviceId: number,
+): Promise<void> {
+  return deleteAuth(`/business/salons/${salonId}/services/${serviceId}`, accessToken)
 }
 
 export function createSalonPhoto(

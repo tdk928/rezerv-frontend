@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { Search } from 'lucide-react'
 import type { City } from '../../api/business'
 import { Button } from '../../components/ui/Button'
+import { sortCitiesForSelect } from './sortCities'
 
 interface SearchBarProps {
   cities: City[]
@@ -14,6 +15,7 @@ interface SearchBarProps {
 export function SearchBar({ cities, cityId, onCityChange }: SearchBarProps) {
   const [q, setQ] = useState('')
   const navigate = useNavigate()
+  const orderedCities = useMemo(() => sortCitiesForSelect(cities), [cities])
 
   function submit(event: React.FormEvent) {
     event.preventDefault()
@@ -47,7 +49,7 @@ export function SearchBar({ cities, cityId, onCityChange }: SearchBarProps) {
           aria-label="Град"
           className="w-full rounded-full border border-line bg-white/70 px-4 py-2.5 text-sm text-ink focus:border-brand focus:outline-none sm:w-44"
         >
-          {cities.map((city) => (
+          {orderedCities.map((city) => (
             <option key={city.id} value={city.id}>
               {city.name}
             </option>

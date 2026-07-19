@@ -72,6 +72,22 @@ export async function getAuth<TResponse>(path: string, accessToken: string): Pro
   return handle<TResponse>(response)
 }
 
+export async function deleteAuth(path: string, accessToken: string): Promise<void> {
+  const response = await fetch(`/api${path}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (response.status === 401) {
+    unauthorizedHandler?.()
+  }
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null
+    throw errorBody?.code
+      ? new ApiError(errorBody)
+      : new Error(`Неочаквана грешка (HTTP ${response.status})`)
+  }
+}
+
 async function handle<TResponse>(response: Response): Promise<TResponse> {
   if (!response.ok) {
     const errorBody = (await response.json().catch(() => null)) as ApiErrorBody | null

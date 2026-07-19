@@ -7,7 +7,9 @@
 - Route `/business/salons` + `MySalonsPage`
 - Sidebar линк „Моите обекти“ (до Моите фирми)
 - Данни от съществуващия `GET /business/companies/mine` — филтър `status === APPROVED`, flatten `salons`
-- Unit тест
+- Услуги: списък + форма (категория, име, минути, цена) → `POST .../salons/{id}/services`
+- По-голям status badge
+- Unit тестове
 
 ## Решения
 Без нов backend endpoint — reuse на mine + salons. „Активна компания“ = APPROVED.

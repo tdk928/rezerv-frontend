@@ -148,7 +148,7 @@ function CompanyCard({
               type="button"
               className={
                 canAddSalon
-                  ? '!bg-success px-5 py-2.5 text-sm text-white shadow-md shadow-success/30 enabled:hover:!bg-success enabled:hover:!opacity-90'
+                  ? '!bg-success px-5 py-2.5 text-sm text-white shadow-md shadow-success/30 enabled:hover:!brightness-110 enabled:hover:!shadow-lg enabled:hover:!shadow-success/45 enabled:hover:!-translate-y-0.5'
                   : '!bg-ink-muted/25 !text-ink-muted !shadow-none px-5 py-2.5 text-sm'
               }
               disabled={!canAddSalon}

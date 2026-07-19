@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 import { Clock, Mail, MapPin, Phone, Star } from 'lucide-react'
 import { getSalon } from '../api/business'
 import { Button } from '../components/ui/Button'
+import { formatEuro } from '../lib/formatEuro'
 
 export function SalonDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -106,7 +107,7 @@ export function SalonDetailPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="font-semibold text-ink">{service.price} лв.</span>
+                    <span className="font-semibold text-ink">{formatEuro(service.price)} €</span>
                     <Button className="shrink-0" disabled title="Резервацията идва скоро">
                       Запази
                     </Button>
