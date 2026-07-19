@@ -7,6 +7,7 @@ import { BusinessOnboardingPage } from './pages/BusinessOnboardingPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyCompaniesPage } from './pages/MyCompaniesPage'
+import { MySalonsPage } from './pages/MySalonsPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { SalonDetailPage } from './pages/SalonDetailPage'
 import { SalonsPage } from './pages/SalonsPage'
@@ -35,6 +36,14 @@ export function App() {
           element={
             <RequireAuth>
               <MyCompaniesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/business/salons"
+          element={
+            <RequireAuth>
+              <MySalonsPage />
             </RequireAuth>
           }
         />
