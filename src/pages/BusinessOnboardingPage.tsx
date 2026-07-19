@@ -30,16 +30,18 @@ export function BusinessOnboardingPage() {
   if (doneMessage !== null) {
     return (
       <main className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-gradient mb-3 text-2xl font-bold">Готово!</h1>
-        <p className="mb-6 text-ink-secondary">{doneMessage}</p>
-        <Button onClick={() => navigate('/business/companies')}>Към моите фирми</Button>
+        <div className="glass-strong rounded-3xl p-8">
+          <h1 className="mb-3 text-2xl font-bold tracking-tight text-ink">Готово!</h1>
+          <p className="mb-6 text-ink-secondary">{doneMessage}</p>
+          <Button onClick={() => navigate('/business/companies')}>Към моите фирми</Button>
+        </div>
       </main>
     )
   }
 
   return (
     <main className="mx-auto max-w-xl px-4 py-10">
-      <h1 className="text-gradient mb-2 text-center text-3xl font-extrabold">Регистрация на фирма</h1>
+      <h1 className="mb-2 text-center text-3xl font-bold tracking-tight text-ink">Регистрация на фирма</h1>
       <p className="mb-8 text-center text-sm text-ink-secondary">
         Стъпка {step + 1} от {STEPS.length}: {STEPS[step]}
       </p>
@@ -48,13 +50,13 @@ export function BusinessOnboardingPage() {
         {STEPS.map((label, index) => (
           <div
             key={label}
-            className={`h-1 flex-1 rounded-full ${index <= step ? 'bg-gradient-brand' : 'bg-line'}`}
+            className={`h-1.5 flex-1 rounded-full ${index <= step ? 'bg-brand' : 'bg-white/50'}`}
             aria-hidden
           />
         ))}
       </div>
 
-      <div className="rounded-2xl border border-line bg-card p-6 sm:p-8">
+      <div className="glass-strong rounded-3xl p-6 sm:p-8">
         {step === 0 && accessToken !== null && (
           <CompanyStep
             accessToken={accessToken}
@@ -136,7 +138,7 @@ function CompanyStep({
         <FieldError message={errors.phone?.message} />
       </div>
       {serverError && (
-        <p className="mb-4 rounded-lg bg-brand-soft px-3 py-2 text-sm text-danger">{serverError}</p>
+        <p className="mb-4 rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">{serverError}</p>
       )}
       <Button type="submit" className="w-full" disabled={mutation.isPending}>
         {mutation.isPending ? 'Регистриране…' : 'Продължи'}
@@ -148,20 +150,20 @@ function CompanyStep({
 function TermsAndSignStep({ onComplete }: { onComplete: () => void }) {
   return (
     <div>
-      <h2 className="text-gradient-soft mb-3 text-lg font-semibold">Общи условия и подпис</h2>
+      <h2 className="mb-3 text-lg font-semibold text-ink">Общи условия и подпис</h2>
       <p className="mb-6 text-sm leading-relaxed text-ink-secondary">{TERMS_LOREM}</p>
 
       <div className="mb-6 flex flex-col gap-2 sm:flex-row">
         <button
           type="button"
-          className="rounded-lg border border-line bg-surface px-4 py-2.5 text-sm text-ink-secondary transition-colors hover:border-brand hover:text-ink"
+          className="rounded-full border border-line bg-white/70 px-4 py-2.5 text-sm font-medium text-ink-secondary transition-colors hover:text-ink"
           onClick={() => undefined}
         >
           Общи условия
         </button>
         <button
           type="button"
-          className="rounded-lg border border-line bg-surface px-4 py-2.5 text-sm text-ink-secondary transition-colors hover:border-brand hover:text-ink"
+          className="rounded-full border border-line bg-white/70 px-4 py-2.5 text-sm font-medium text-ink-secondary transition-colors hover:text-ink"
           onClick={() => undefined}
         >
           Договор за ползване

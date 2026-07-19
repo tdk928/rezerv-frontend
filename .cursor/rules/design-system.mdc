@@ -1,24 +1,21 @@
 ---
-description: Дизайн система за rezerv-frontend (мека тъмна тема + gradient)
+description: Дизайн система rezerv-frontend — Apple Liquid Glass (светла стъклена UI)
 alwaysApply: true
 ---
 
-# Дизайн система — мека тъмна тема с gradient акценти
+# Дизайн система — Liquid Glass
 
 > Пълна спецификация: **`docs/DESIGN.md`**.
 
 Токени в `src/index.css`:
 
-- Фон `surface` `#0c0a14` (не чисто черно); карти `card` `#181526`; `line` `#342e45`
-- Текст `ink` `#faf8ff` / secondary `#c4b5d4` / muted `#8b7a9e`
-- Brand `#c084fc`; soft `#241536`
-- Gradient: blue `#60a5fa` → violet `#c084fc` → pink `#f472b6` → orange `#fb923c`
-- Ambient glow на `body` (radial gradients) — не махай без причина
+- Светла тема + цветен mesh фон на `body` (violet/cyan/pink/orange)
+- Glass utilities: `glass`, `glass-strong`, `glass-tint` (blur + saturate + бял border)
+- Текст `ink` `#1d1d1f` / secondary `#6e6e73` / muted `#86868b`
+- Brand Apple blue `#0071e3` (не purple rainbow бутони)
+- Форми: карти `rounded-3xl`, бутони `rounded-full` (pill)
+- Шрифт: SF Pro / `-apple-system` (нарочно)
+- Chrome: горен Navbar (само auth) + ляв Sidebar (бизнес линкове, active pill)
 
-Utilities:
-
-- `text-gradient` — лого / hero
-- `text-gradient-soft` — секционни заглавия, auth subtitle
-- `bg-gradient-brand` — primary бутони
-
-Правила: mobile-first; `Button` компоненти; токени вместо hex; skeleton loading.
+Правила: glass за навигация/карти/контроли; mobile-first; `Button`; токени вместо hex;
+уважавай `prefers-reduced-transparency`; без тъмна тема в този бранч.

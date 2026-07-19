@@ -3,11 +3,14 @@ import type { ButtonHTMLAttributes } from 'react'
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-gradient-brand text-white hover:opacity-90 disabled:opacity-40',
+  primary:
+    'bg-brand text-white shadow-sm shadow-brand/25 enabled:hover:bg-brand-hover enabled:hover:shadow-md enabled:hover:shadow-brand/30 enabled:active:scale-[0.98] disabled:opacity-40',
   secondary:
-    'bg-card text-ink border border-line hover:border-brand disabled:text-ink-muted disabled:hover:border-line',
-  ghost: 'bg-transparent text-ink-secondary hover:bg-card hover:text-ink disabled:text-ink-muted',
-  danger: 'bg-danger text-white hover:opacity-90 disabled:opacity-40',
+    'glass text-ink enabled:hover:bg-white/80 disabled:text-ink-muted disabled:opacity-50',
+  ghost:
+    'bg-transparent text-ink-secondary enabled:hover:bg-white/50 enabled:hover:text-ink disabled:text-ink-muted disabled:opacity-50',
+  danger:
+    'bg-danger text-white shadow-sm enabled:hover:opacity-90 enabled:active:scale-[0.98] disabled:opacity-40',
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -18,7 +21,7 @@ export function Button({ variant = 'primary', className = '', type = 'button', .
   return (
     <button
       type={type}
-      className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition-all disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold tracking-tight transition-all duration-200 disabled:pointer-events-none disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`}
       {...props}
     />
   )

@@ -10,7 +10,7 @@ interface SearchBarProps {
   onCityChange: (id: number) => void
 }
 
-/** Едно търсачно поле: услуга/салон + предварително попълнен град. */
+/** Едно търсачно поле — glass pill (Liquid Glass control). */
 export function SearchBar({ cities, cityId, onCityChange }: SearchBarProps) {
   const [q, setQ] = useState('')
   const navigate = useNavigate()
@@ -26,9 +26,9 @@ export function SearchBar({ cities, cityId, onCityChange }: SearchBarProps) {
   return (
     <form
       onSubmit={submit}
-      className="flex w-full max-w-2xl flex-col gap-2 rounded-2xl border border-line bg-card p-2 sm:flex-row"
+      className="glass flex w-full max-w-2xl flex-col gap-2 rounded-full p-2 sm:flex-row sm:items-center"
     >
-      <div className="flex flex-1 items-center gap-2 px-2">
+      <div className="flex flex-1 items-center gap-2 px-3">
         <Search aria-hidden className="size-4 shrink-0 text-ink-muted" />
         <input
           type="text"
@@ -45,7 +45,7 @@ export function SearchBar({ cities, cityId, onCityChange }: SearchBarProps) {
           value={cityId ?? ''}
           onChange={(e) => onCityChange(Number(e.target.value))}
           aria-label="Град"
-          className="w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-sm text-ink focus:border-brand focus:outline-none sm:w-44"
+          className="w-full rounded-full border border-line bg-white/70 px-4 py-2.5 text-sm text-ink focus:border-brand focus:outline-none sm:w-44"
         >
           {cities.map((city) => (
             <option key={city.id} value={city.id}>

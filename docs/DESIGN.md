@@ -1,44 +1,62 @@
-# REZERV — Дизайн система (v1.1, 2026-07-17)
+# REZERV — Дизайн система (v2 · Liquid Glass, 2026-07-17)
 
-> Това е ЕДИНСТВЕНИЯТ източник на истина за визуалния стил. Когато собственикът каже
-> „направи ми екран", екранът се прави по този документ без допълнителни обяснения.
-> При промяна на дизайна — обнови ТОЗИ файл + `.cursor/rules/design-system.mdc`.
+> Единствен източник на истина. При промяна — обнови и `.cursor/rules/design-system.mdc`.
 
-## 1. Философия
+## 1. Философия (Apple Liquid Glass)
 
-- **Тъмно, но меко:** дълбок indigo/violet фон (не чисто `#000`), върху който
-  „светят“ gradient акценти (синьо → лилаво → розово → оранжево) + леки ambient
-  светлинки на `body`.
-- **Шарени заглавия, спокоен текст:** gradient за лого/hero/`text-gradient-soft`
-  за секции; body текст остава светъл, без rainbow на параграфи.
-- **Едри, меки форми:** карти `rounded-2xl`, бутони/inputs `rounded-lg`.
-- **Български текст**, дати `dd.MM.yyyy`, 24h.
+Базирано на [Apple Liquid Glass](https://developer.apple.com/documentation/TechnologyOverviews/adopting-liquid-glass)
+(iOS 26 / macOS Tahoe): **прозрачен материал** с blur + refraction върху съдържанието.
+Glass е **функционален слой** (навигация, контроли, карти) — не запълва целия екран.
+
+- **Светла тема** с цветен ambient фон (violet / cyan / pink / orange mesh).
+- **Стъклени панели** (`glass` / `glass-strong`): blur 28–40px, saturate, тънък бял border, мека сянка.
+- **Концентрични заобляния**: карти `rounded-3xl` (24px), бутони **pill** `rounded-full`.
+- **Accent**: Apple system blue `#0071e3` — solid primary, не rainbow gradient върху бутони.
+- **Типография**: SF Pro / `-apple-system` (системният Apple стек — нарочно за Liquid look).
+- **Български текст**, дати `dd.MM.yyyy`.
 
 ## 2. Цветове (`src/index.css` `@theme`)
 
 | Токен | Стойност | Употреба |
 |-------|----------|----------|
-| `surface` | `#0c0a14` | Фон на страницата |
-| `card` | `#181526` | Карти |
-| `line` | `#342e45` | Бордери |
-| `ink` | `#faf8ff` | Основен текст |
-| `ink-secondary` | `#c4b5d4` | Labels, вторичен текст |
-| `ink-muted` | `#8b7a9e` | Placeholder |
-| `brand` | `#c084fc` | Links, focus |
-| `brand-soft` | `#241536` | Error/info кутии |
-
-Gradient: blue `#60a5fa` → violet `#c084fc` → pink `#f472b6` → orange `#fb923c`.
+| `surface` | `#f5f5f7` | База (под mesh) |
+| `card` | `rgb(255 255 255 / 0.62)` | Полупрозрачни карти |
+| `line` | `rgb(0 0 0 / 0.08)` | Фини бордери |
+| `ink` | `#1d1d1f` | Основен текст |
+| `ink-secondary` | `#6e6e73` | Labels |
+| `ink-muted` | `#86868b` | Placeholder |
+| `brand` | `#0071e3` | Primary / links / focus |
+| `brand-soft` | `rgb(0 113 227 / 0.12)` | Soft tint |
+| `success` / `warning` / `danger` | `#30d158` / `#ff9f0a` / `#ff453a` | Статуси |
 
 ## 3. Utilities
 
-- `text-gradient` — пълен rainbow (лого, hero)
-- `text-gradient-soft` — violet→pink (секционни заглавия, auth subtitle)
-- `bg-gradient-brand` — primary бутони
+- `glass` — стандартен frosted panel (навигация, карти, форми)
+- `glass-strong` — по-плътно стъкло (auth card, модали)
+- `glass-tint` — лек blue tint за selected / highlight
+- `text-gradient` — само за декоративни акценти (рядко)
+- `text-gradient-soft` — почти ink за секции
+- `bg-gradient-brand` — subtle blue fill за primary (не rainbow)
 
-`body` има fixed radial ambient glow (violet/blue/pink) — не го презаписвай с
-плоско `bg-surface` на layout, освен ако нарочно искаш „глух“ екран.
+`body` има fixed multi-radial mesh — **не го махай**; glass-ът „пие“ тези цветове.
 
-## 4–8.
+## 4. Компоненти
 
-Компоненти, layout, loading, do/don't — както досега: `Button`, `AuthCard`,
-`Navbar`, mobile-first, без хардкоднат hex в className, без светла/бяла тема.
+- **Button**: `rounded-full`, primary = brand blue; secondary = glass + border; ghost = transparent.
+- **Navbar**: sticky floating `glass` pill bar — само лого + Вход/Регистрация/Изход.
+- **Sidebar**: ляв glass панел (Adobe-style) — Начало, Моите фирми, Всички фирми, Регистрирай/Нова фирма; active = бял pill.
+- **AuthCard / forms**: `glass-strong` + `rounded-3xl`; inputs pill-ish `rounded-2xl` на `bg-white/70`.
+- **SalonCard / tiles**: `glass`, hover леко scale/shadow.
+- **Tables** (admin): glass container, чисти редове, status pills.
+
+## 5. Do / Don't
+
+**Do:** стъкло за chrome; щедър whitespace; pill CTA; контраст ink върху glass.
+
+**Don't:** тъмна/violet theme; rainbow primary бутони; плоски сиви карти без blur;
+смесване на dark+liquid; твърде много стъкло едно върху друго (glass-on-glass).
+
+## 6. Accessibility
+
+Уважавай `prefers-reduced-transparency` (в CSS — по-плътен фон, без blur).
+Тествай четимост върху пъстри участъци от mesh фона.

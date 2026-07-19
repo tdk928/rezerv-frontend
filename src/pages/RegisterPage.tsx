@@ -86,7 +86,7 @@ export function RegisterPage() {
         </div>
 
         {serverError && (
-          <p className="mb-4 rounded-lg bg-brand-soft px-3 py-2 text-sm text-danger">
+          <p className="mb-4 rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">
             {serverError}
           </p>
         )}

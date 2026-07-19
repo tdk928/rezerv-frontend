@@ -41,7 +41,7 @@ export function SalonsPage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-6">
-        <h1 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
           {titleParts.join(' ')}
         </h1>
         {!isLoading && results && (
@@ -58,7 +58,7 @@ export function SalonsPage() {
       </div>
 
       {!isLoading && results?.content.length === 0 && (
-        <div className="rounded-2xl border border-line bg-card p-8 text-center">
+        <div className="glass rounded-3xl p-8 text-center">
           <p className="text-ink-secondary">Няма намерени салони с тези критерии.</p>
           <p className="mt-1 text-sm text-ink-muted">Опитай с друг град или категория.</p>
         </div>

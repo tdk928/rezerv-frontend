@@ -49,7 +49,7 @@ export function MyCompaniesPage() {
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-gradient text-3xl font-extrabold tracking-tight">Моите фирми</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-ink">Моите фирми</h1>
           <p className="mt-2 text-sm text-ink-secondary">Фирми и обекти, регистрирани към акаунта ви.</p>
         </div>
         <Button onClick={() => navigate('/business/onboarding')}>Нова фирма</Button>
@@ -57,12 +57,12 @@ export function MyCompaniesPage() {
 
       {query.isLoading && <p className="text-sm text-ink-muted">Зареждане…</p>}
       {query.isError && (
-        <p className="rounded-lg bg-brand-soft px-3 py-2 text-sm text-danger">
+        <p className="glass-tint rounded-2xl px-4 py-3 text-sm text-danger">
           Неуспешно зареждане на фирмите.
         </p>
       )}
       {query.data?.length === 0 && (
-        <div className="rounded-2xl border border-line bg-card p-8 text-center">
+        <div className="glass rounded-3xl p-8 text-center">
           <p className="text-ink-secondary">Все още нямате регистрирана фирма.</p>
           <Button className="mt-4" onClick={() => navigate('/business/onboarding')}>
             Регистрирай фирма
@@ -77,9 +77,10 @@ export function MyCompaniesPage() {
             company={company}
             accessToken={accessToken!}
             isAdding={addingForCompanyId === company.id}
-            onToggleAdd={() =>
+            onToggleAdd={() => {
+              if (company.status !== 'APPROVED') return
               setAddingForCompanyId((id) => (id === company.id ? null : company.id))
-            }
+            }}
             onSalonAdded={() => setAddingForCompanyId(null)}
           />
         ))}
@@ -101,48 +102,61 @@ function CompanyCard({
   onToggleAdd: () => void
   onSalonAdded: () => void
 }) {
+  const canAddSalon = company.status === 'APPROVED'
+  const showAddForm = isAdding && canAddSalon
+
   return (
-    <li className="rounded-2xl border border-line bg-card p-5 sm:p-6">
+    <li className="glass rounded-3xl p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-semibold text-ink">{company.name}</h2>
+          <h2 className="text-lg font-semibold tracking-tight text-ink">{company.name}</h2>
           <p className="mt-1 text-sm text-ink-secondary">{company.legalName}</p>
 
           <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-ink-muted">ЕИК</dt>
-              <dd className="text-ink-secondary">{company.eik}</dd>
+              <dd className="font-medium text-ink">{company.eik}</dd>
             </div>
             <div>
               <dt className="text-ink-muted">Имейл</dt>
-              <dd className="text-ink-secondary">{company.email}</dd>
+              <dd className="font-medium text-ink">{company.email}</dd>
             </div>
             <div>
               <dt className="text-ink-muted">Телефон</dt>
-              <dd className="text-ink-secondary">{company.phone}</dd>
+              <dd className="font-medium text-ink">{company.phone}</dd>
             </div>
             <div>
               <dt className="text-ink-muted">Регистрирана</dt>
-              <dd className="text-ink-secondary">{formatDate(company.createdAt)}</dd>
+              <dd className="font-medium text-ink">{formatDate(company.createdAt)}</dd>
             </div>
           </dl>
         </div>
-        <span className="rounded-lg border border-line px-2.5 py-1 text-xs text-ink-secondary">
+        <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-ink-secondary shadow-sm">
           {STATUS_LABEL[company.status] ?? company.status}
         </span>
       </div>
 
       <div className="mt-5 border-t border-line pt-4">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-sm font-medium text-ink-secondary">Обекти</h3>
-          {isAdding ? (
+          <h3 className="text-sm font-semibold text-ink-secondary">Обекти</h3>
+          {showAddForm ? (
             <Button type="button" variant="ghost" onClick={onToggleAdd}>
               Отказ
             </Button>
           ) : (
             <Button
               type="button"
-              className="!bg-success !bg-none px-5 py-3 text-base text-surface shadow-md shadow-success/30 hover:!opacity-90"
+              className={
+                canAddSalon
+                  ? '!bg-success px-5 py-2.5 text-sm text-white shadow-md shadow-success/30 enabled:hover:!bg-success enabled:hover:!opacity-90'
+                  : '!bg-ink-muted/25 !text-ink-muted !shadow-none px-5 py-2.5 text-sm'
+              }
+              disabled={!canAddSalon}
+              title={
+                canAddSalon
+                  ? undefined
+                  : 'Обекти могат да се добавят само след одобрение на фирмата'
+              }
               onClick={onToggleAdd}
             >
               + Добави обект
@@ -150,22 +164,28 @@ function CompanyCard({
           )}
         </div>
 
-        {company.salons.length === 0 && !isAdding ? (
+        {!canAddSalon && (
+          <p className="mb-3 text-xs text-ink-muted">
+            Обекти се добавят след като фирмата бъде одобрена.
+          </p>
+        )}
+
+        {company.salons.length === 0 && !showAddForm ? (
           <p className="text-sm text-ink-muted">Няма добавени обекти.</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {company.salons.map((salon) => (
               <li
                 key={salon.id}
-                className="flex flex-wrap items-baseline justify-between gap-2 rounded-lg bg-surface px-3 py-2.5"
+                className="flex flex-wrap items-baseline justify-between gap-2 rounded-2xl bg-white/55 px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-medium text-ink">{salon.name}</p>
+                  <p className="text-sm font-semibold text-ink">{salon.name}</p>
                   <p className="text-xs text-ink-muted">
                     {salon.city.name} · {salon.address}
                   </p>
                 </div>
-                <span className="text-xs text-ink-secondary">
+                <span className="text-xs font-medium text-ink-secondary">
                   {SALON_STATUS_LABEL[salon.status] ?? salon.status}
                 </span>
               </li>
@@ -173,8 +193,8 @@ function CompanyCard({
           </ul>
         )}
 
-        {isAdding && (
-          <div className="mt-4 rounded-xl border border-line bg-surface p-4 sm:p-5">
+        {showAddForm && (
+          <div className="glass-strong mt-4 rounded-3xl p-4 sm:p-5">
             <h4 className="mb-4 text-sm font-semibold text-ink">Нов обект</h4>
             <AddSalonForm
               accessToken={accessToken}
@@ -320,7 +340,7 @@ function AddSalonForm({
       </div>
 
       {serverError && (
-        <p className="rounded-lg bg-brand-soft px-3 py-2 text-sm text-danger">{serverError}</p>
+        <p className="rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">{serverError}</p>
       )}
 
       <div className="flex flex-wrap gap-2">
