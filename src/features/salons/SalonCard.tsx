@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { MapPin, Star } from 'lucide-react'
 import type { SalonCard as SalonCardData } from '../../api/business'
+import { formatEuro } from '../../lib/formatEuro'
 
 export function SalonCard({ salon }: { salon: SalonCardData }) {
   return (
@@ -36,7 +37,7 @@ export function SalonCard({ salon }: { salon: SalonCardData }) {
 
         {salon.priceFrom !== null && (
           <p className="text-sm text-ink-muted">
-            от <span className="font-semibold text-ink">{salon.priceFrom} лв.</span>
+            от <span className="font-semibold text-ink">{formatEuro(salon.priceFrom)} €</span>
           </p>
         )}
       </div>

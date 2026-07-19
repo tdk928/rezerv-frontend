@@ -21,5 +21,20 @@ export const salonSchema = z.object({
   phone: z.string().trim().min(1, 'Въведете телефон').max(30),
 })
 
+/** Форма за добавяне на услуга към обект. */
+export const salonServiceSchema = z.object({
+  categoryId: z.string().min(1, 'Изберете категория'),
+  name: z.string().trim().min(1, 'Въведете име на услугата').max(200),
+  durationMin: z
+    .string()
+    .trim()
+    .regex(/^[1-9][0-9]*$/, 'Въведете минути (цяло число > 0)'),
+  price: z
+    .string()
+    .trim()
+    .regex(/^\d+(\.\d{1,2})?$/, 'Въведете цена (напр. 15.39)'),
+})
+
 export type CompanyFormValues = z.infer<typeof companySchema>
 export type SalonFormValues = z.infer<typeof salonSchema>
+export type SalonServiceFormValues = z.infer<typeof salonServiceSchema>
