@@ -10,6 +10,12 @@ import { useAuth } from '../auth/AuthContext'
 import { Button } from '../components/ui/Button'
 import { FieldError, inputClasses, labelClasses } from '../features/auth/AuthCard'
 import { salonSchema, type SalonFormValues } from '../features/business/onboardingSchemas'
+import {
+  WEEKDAYS,
+  defaultWorkingDaysState,
+  toWorkingHoursPayload,
+  type DayHoursState,
+} from '../features/business/workingDays'
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING_APPROVAL: 'Чака одобрение',
@@ -221,11 +227,17 @@ function AddSalonForm({
   onCancel: () => void
 }) {
   const queryClient = useQueryClient()
+  const [dayState, setDayState] = useState(defaultWorkingDaysState)
+
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
-  } = useForm<SalonFormValues>({ resolver: zodResolver(salonSchema) })
+  } = useForm<SalonFormValues>({
+    resolver: zodResolver(salonSchema),
+    defaultValues: { workingHours: toWorkingHoursPayload(defaultWorkingDaysState()) },
+  })
 
   const citiesQuery = useQuery({
     queryKey: ['cities'],
@@ -241,6 +253,7 @@ function AddSalonForm({
         address: values.address,
         email: values.email,
         phone: values.phone,
+        workingHours: values.workingHours,
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['my-companies'] })
@@ -250,8 +263,22 @@ function AddSalonForm({
 
   const serverError = serverErrorMessage(mutation.error)
 
+  function updateDay(dayOfWeek: number, patch: Partial<DayHoursState>) {
+    setDayState((prev) => {
+      const next = { ...prev, [dayOfWeek]: { ...prev[dayOfWeek], ...patch } }
+      setValue('workingHours', toWorkingHoursPayload(next), { shouldValidate: true })
+      return next
+    })
+  }
+
   return (
-    <form onSubmit={handleSubmit((values) => mutation.mutate(values))} noValidate className="space-y-4">
+    <form
+      onSubmit={handleSubmit((values) =>
+        mutation.mutate({ ...values, workingHours: toWorkingHoursPayload(dayState) }),
+      )}
+      noValidate
+      className="space-y-4"
+    >
       <div>
         <label htmlFor={`salon-name-${companyId}`} className={labelClasses}>
           Име на обекта
@@ -338,6 +365,54 @@ function AddSalonForm({
         />
         <FieldError message={errors.description?.message} />
       </div>
+
+      <fieldset className="space-y-3">
+        <legend className={labelClasses}>Работни дни</legend>
+        <p className="text-xs text-ink-muted">
+          По подразбиране пн–пет 09:00–18:00. Можете да промените часовете по ден (напр. събота с
+          намалено време).
+        </p>
+        <ul className="space-y-2">
+          {WEEKDAYS.map((day) => {
+            const row = dayState[day.dayOfWeek]
+            return (
+              <li
+                key={day.dayOfWeek}
+                className="flex flex-wrap items-center gap-3 rounded-2xl bg-white/45 px-3 py-2"
+              >
+                <label className="flex min-w-[8.5rem] items-center gap-2 text-sm text-ink">
+                  <input
+                    type="checkbox"
+                    checked={row.enabled}
+                    onChange={(e) => updateDay(day.dayOfWeek, { enabled: e.target.checked })}
+                  />
+                  {day.label}
+                </label>
+                <input
+                  type="time"
+                  step={1800}
+                  disabled={!row.enabled}
+                  value={row.openTime}
+                  onChange={(e) => updateDay(day.dayOfWeek, { openTime: e.target.value })}
+                  className={`${inputClasses} w-auto disabled:opacity-40`}
+                  aria-label={`${day.label} от`}
+                />
+                <span className="text-xs text-ink-muted">до</span>
+                <input
+                  type="time"
+                  step={1800}
+                  disabled={!row.enabled}
+                  value={row.closeTime}
+                  onChange={(e) => updateDay(day.dayOfWeek, { closeTime: e.target.value })}
+                  className={`${inputClasses} w-auto disabled:opacity-40`}
+                  aria-label={`${day.label} до`}
+                />
+              </li>
+            )
+          })}
+        </ul>
+        <FieldError message={errors.workingHours?.message as string | undefined} />
+      </fieldset>
 
       {serverError && (
         <p className="rounded-2xl bg-danger/10 px-3 py-2 text-sm text-danger">{serverError}</p>
