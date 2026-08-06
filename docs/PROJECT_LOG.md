@@ -6,6 +6,7 @@
 
 | # | Бранч | Обобщение |
 |---|-------|-----------|
+| 16 | feature/booking-staff-selection | Booking UI показва свободните служители за избрания час и изисква точно един; единственият наличен се избира автоматично. |
 | 15 | feature/staff-onboarding-ui | Добави служител: табове „Създай“ (нов CAS STAFF) / „Съществуващ“ (email). `POST .../staff/create`. |
 | 14 | feature/working-days-liquid-ui | Работно време при нов обект: Liquid Glass list + switches + pill часове + presets. |
 | 13 | feature/booking-calendar-ui | `/salons/:id/book` — календар + слотове + резервация (CLIENT). „Запази“ от детайл на салон. |

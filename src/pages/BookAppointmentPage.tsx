@@ -61,6 +61,7 @@ export function BookAppointmentPage() {
   const [monthCursor, setMonthCursor] = useState(() => startOfMonth(today))
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
+  const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null)
 
   const salonQuery = useQuery({
     queryKey: ['salon', salonId],
@@ -90,6 +91,11 @@ export function BookAppointmentPage() {
     return slotsQuery.data?.find((d) => d.date === selectedDate)?.slots ?? []
   }, [slotsQuery.data, selectedDate])
 
+  const selectedSlotDetails = useMemo(
+    () => daySlots.find((slot) => slot.startsAt === selectedSlot) ?? null,
+    [daySlots, selectedSlot],
+  )
+
   const service = useMemo(() => {
     for (const g of salonQuery.data?.serviceGroups ?? []) {
       const found = g.services.find((s) => s.id === serviceId)
@@ -103,6 +109,7 @@ export function BookAppointmentPage() {
       createAppointment(accessToken!, {
         salonId,
         serviceId,
+        staffId: selectedStaffId!,
         startsAt: selectedSlot!,
       }),
     onSuccess: () => {
@@ -212,6 +219,7 @@ export function BookAppointmentPage() {
                 onClick={() => {
                   setSelectedDate(iso)
                   setSelectedSlot(null)
+                  setSelectedStaffId(null)
                 }}
                 className={[
                   'aspect-square rounded-2xl text-sm transition',
@@ -240,7 +248,7 @@ export function BookAppointmentPage() {
             {formatDayLabel(selectedDate)}
           </h3>
           <p className="mb-4 text-xs text-ink-muted">
-            Без избран служител системата разпределя равномерно между свободните.
+            Изберете свободен час, след което конкретен служител.
           </p>
           {daySlots.length === 0 ? (
             <p className="text-sm text-ink-muted">Няма свободни часове за този ден.</p>
@@ -252,7 +260,10 @@ export function BookAppointmentPage() {
                   <button
                     key={slot.startsAt}
                     type="button"
-                    onClick={() => setSelectedSlot(slot.startsAt)}
+                    onClick={() => {
+                      setSelectedSlot(slot.startsAt)
+                      setSelectedStaffId(slot.staff.length === 1 ? slot.staff[0]!.id : null)
+                    }}
                     className={[
                       'rounded-full px-4 py-2 text-sm font-medium transition',
                       active
@@ -266,6 +277,63 @@ export function BookAppointmentPage() {
               })}
             </div>
           )}
+
+          {selectedSlotDetails ? (
+            <div className="mt-5 border-t border-line pt-5">
+              <h4 className="text-sm font-semibold text-ink">Изберете служител</h4>
+              <p className="mt-1 text-xs text-ink-muted">
+                {selectedSlotDetails.staff.length === 1
+                  ? 'За този час е наличен един служител и е избран автоматично.'
+                  : 'Изберете точно един от наличните служители.'}
+              </p>
+
+              {selectedSlotDetails.staff.length > 0 ? (
+                <div
+                  className="mt-3 grid gap-2 sm:grid-cols-2"
+                  role="radiogroup"
+                  aria-label="Налични служители"
+                >
+                  {selectedSlotDetails.staff.map((staff) => {
+                    const selected = selectedStaffId === staff.id
+                    return (
+                      <button
+                        key={staff.id}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        onClick={() => setSelectedStaffId(staff.id)}
+                        className={[
+                          'flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition-all',
+                          selected
+                            ? 'border-success/30 bg-success text-white shadow-sm shadow-success/25'
+                            : 'border-white/60 bg-white/60 text-ink hover:bg-white/90',
+                        ].join(' ')}
+                      >
+                        <span
+                          aria-hidden
+                          className={[
+                            'flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold',
+                            selected ? 'bg-white/25' : 'bg-brand-soft text-brand',
+                          ].join(' ')}
+                        >
+                          {selected ? '✓' : staff.displayName.slice(0, 1).toUpperCase()}
+                        </span>
+                        <span className="text-sm font-semibold">{staff.displayName}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-danger">
+                  Няма свободен служител за избрания час.
+                </p>
+              )}
+
+              {selectedSlotDetails.staff.length > 1 && selectedStaffId === null ? (
+                <p className="mt-2 text-sm text-danger">Изберете точно един служител.</p>
+              ) : null}
+            </div>
+          ) : null}
         </section>
       ) : null}
 
@@ -294,7 +362,12 @@ export function BookAppointmentPage() {
           type="button"
           className="w-full sm:w-auto"
           disabled={
-            !selectedSlot || !accessToken || !isClient || bookMutation.isPending || !service
+            !selectedSlot ||
+            selectedStaffId === null ||
+            !accessToken ||
+            !isClient ||
+            bookMutation.isPending ||
+            !service
           }
           onClick={() => bookMutation.mutate()}
         >
