@@ -42,7 +42,9 @@ Glass е **функционален слой** (навигация, контро
 
 ## 4. Компоненти
 
-- **Button**: `rounded-full`, primary = brand blue; secondary = glass + border; ghost = transparent.
+- **Button**: `rounded-full`; primary = brand blue; secondary = glass + border; ghost = transparent;
+  `warm` = amber glass за positive create actions; `dangerSoft` = мек coral glass за
+  постоянни destructive actions. Solid danger се пази за финално потвърждение.
 - **Navbar**: sticky floating `glass` pill bar — само лого + Вход/Регистрация/Изход.
 - **Sidebar**: ляв glass панел (Adobe-style) — Начало, Моите фирми, Всички фирми, Регистрирай/Нова фирма; active = бял pill.
 - **AuthCard / forms**: `glass-strong` + `rounded-3xl`; inputs pill-ish `rounded-2xl` на `bg-white/70`.

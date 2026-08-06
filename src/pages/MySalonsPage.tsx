@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
+import { Plus, Trash2 } from 'lucide-react'
 import { getCategories } from '../api/business'
 import {
   addSalonStaff,
@@ -180,10 +181,11 @@ export function MySalonsPage() {
                   ) : (
                     <Button
                       type="button"
-                      className="!bg-success px-5 py-2.5 text-sm text-white shadow-md shadow-success/30 enabled:hover:!brightness-110 enabled:hover:!shadow-lg enabled:hover:!shadow-success/45 enabled:hover:!-translate-y-0.5"
+                      variant="warm"
                       onClick={() => setAddingForSalonId(salon.id)}
                     >
-                      + Добави услуга
+                      <Plus className="mr-1.5 size-4 text-warning" strokeWidth={2.25} />
+                      Добави услуга
                     </Button>
                   )}
                 </div>
@@ -617,21 +619,23 @@ function StaffRow({
                     aria-checked={checked}
                     onClick={() => toggleService(service.id)}
                     className={[
-                      'inline-flex items-center gap-2.5 rounded-full px-3.5 py-2 text-left transition-all duration-200',
+                      'inline-flex items-center gap-2.5 rounded-full px-3.5 py-2 text-left ring-1 ring-inset ring-white/60 backdrop-blur-xl transition-all duration-200',
                       checked
-                        ? 'bg-success text-white shadow-sm shadow-success/30'
+                        ? 'border border-success/20 bg-success/[0.10] text-ink shadow-[0_8px_24px_rgb(48_209_88_/_0.10)] hover:bg-success/[0.15]'
                         : pendingRemoval
-                          ? 'bg-danger text-white shadow-sm shadow-danger/30'
-                        : 'border border-black/[0.06] bg-white/65 text-ink hover:bg-white/90',
+                          ? 'border border-danger/15 bg-danger/[0.07] text-ink shadow-[0_8px_24px_rgb(255_69_58_/_0.08)] hover:bg-danger/[0.11]'
+                          : 'border border-black/[0.06] bg-white/55 text-ink shadow-sm shadow-black/[0.03] hover:bg-white/85',
                     ].join(' ')}
                   >
                     <span
                       aria-hidden
                       className={[
                         'flex size-5 shrink-0 items-center justify-center rounded-full transition-colors',
-                        checked || pendingRemoval
-                          ? 'bg-white/25'
-                          : 'border border-black/15 bg-white/80',
+                        checked
+                          ? 'bg-success/15 text-success ring-1 ring-success/20'
+                          : pendingRemoval
+                            ? 'bg-danger/10 text-danger ring-1 ring-danger/15'
+                            : 'border border-black/10 bg-white/70',
                       ].join(' ')}
                     >
                       {checked ? (
@@ -660,7 +664,7 @@ function StaffRow({
                       <span
                         className={[
                           'mt-0.5 block text-xs tabular-nums',
-                          checked || pendingRemoval ? 'text-white/75' : 'text-ink-muted',
+                          pendingRemoval ? 'text-danger/75' : 'text-ink-muted',
                         ].join(' ')}
                       >
                         {service.durationMin} мин · {formatEuro(service.price)} €
@@ -730,11 +734,12 @@ function ServiceRow({
       </div>
       <Button
         type="button"
-        variant="danger"
+        variant="dangerSoft"
         className="!px-3.5 !py-1.5 text-xs"
         disabled={removeMutation.isPending}
         onClick={() => setConfirmOpen(true)}
       >
+        <Trash2 className="mr-1.5 size-3.5" />
         Премахни
       </Button>
 

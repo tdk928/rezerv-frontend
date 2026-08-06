@@ -13,7 +13,8 @@ alwaysApply: true
 - Glass utilities: `glass`, `glass-strong`, `glass-tint` (blur + saturate + бял border)
 - Текст `ink` `#1d1d1f` / secondary `#6e6e73` / muted `#86868b`
 - Brand Apple blue `#0071e3` (не purple rainbow бутони)
-- Форми: карти `rounded-3xl`, бутони `rounded-full` (pill)
+- Форми: карти `rounded-3xl`, бутони `rounded-full` (pill). За постоянни actions:
+  `warm` amber glass и `dangerSoft` coral glass; solid danger само при финално потвърждение.
 - Шрифт: SF Pro / `-apple-system` (нарочно)
 - Chrome: горен Navbar (само auth) + ляв Sidebar (бизнес линкове, active pill)
 

@@ -18,9 +18,9 @@ vi.mock('../api/booking', () => ({
 
 const REFRESH_TOKEN_KEY = 'rezerv.refreshToken'
 
-function tomorrowSlot() {
+function futureSlot(daysFromNow: number) {
   const date = new Date()
-  date.setDate(date.getDate() + 1)
+  date.setDate(date.getDate() + daysFromNow)
   date.setHours(10, 0, 0, 0)
   const isoDate = [
     date.getFullYear(),
@@ -28,6 +28,10 @@ function tomorrowSlot() {
     String(date.getDate()).padStart(2, '0'),
   ].join('-')
   return { date, isoDate, startsAt: date.toISOString() }
+}
+
+function tomorrowSlot() {
+  return futureSlot(1)
 }
 
 async function selectAvailableDate(user: ReturnType<typeof userEvent.setup>, date: Date) {
@@ -159,5 +163,92 @@ describe('BookAppointmentPage staff selection', () => {
       'aria-checked',
       'true',
     )
+  })
+
+  it('филтрира календара предварително по предпочитан служител', async () => {
+    const user = userEvent.setup()
+    const mariaSlot = futureSlot(1)
+    const ivanSlot = futureSlot(2)
+    vi.mocked(getPublicSlots).mockResolvedValue([
+      {
+        date: mariaSlot.isoDate,
+        slots: [
+          {
+            startsAt: mariaSlot.startsAt,
+            endsAt: new Date(mariaSlot.date.getTime() + 30 * 60_000).toISOString(),
+            staffIds: [11],
+            staff: [{ id: 11, displayName: 'Мария Иванова' }],
+          },
+        ],
+      },
+      {
+        date: ivanSlot.isoDate,
+        slots: [
+          {
+            startsAt: ivanSlot.startsAt,
+            endsAt: new Date(ivanSlot.date.getTime() + 30 * 60_000).toISOString(),
+            staffIds: [12],
+            staff: [{ id: 12, displayName: 'Иван Петров' }],
+          },
+        ],
+      },
+    ])
+
+    renderApp('/salons/7/book?serviceId=15')
+    await user.click(
+      await screen.findByRole('radio', { name: 'Покажи графика на Иван Петров' }),
+    )
+
+    expect(
+      screen
+        .getAllByRole('button', { name: String(mariaSlot.date.getDate()) })
+        .every((button) => button.hasAttribute('disabled')),
+    ).toBe(true)
+
+    await selectAvailableDate(user, ivanSlot.date)
+    await user.click(await screen.findByRole('button', { name: '10:00' }))
+    expect(screen.getByRole('radio', { name: 'Иван Петров' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    )
+  })
+
+  it('запазва избраната дата и сменя часовете при избор на служител', async () => {
+    const user = userEvent.setup()
+    const mariaSlot = futureSlot(1)
+    const ivanStartsAt = new Date(mariaSlot.date)
+    ivanStartsAt.setHours(11, 0, 0, 0)
+    vi.mocked(getPublicSlots).mockResolvedValue([
+      {
+        date: mariaSlot.isoDate,
+        slots: [
+          {
+            startsAt: mariaSlot.startsAt,
+            endsAt: new Date(mariaSlot.date.getTime() + 30 * 60_000).toISOString(),
+            staffIds: [11],
+            staff: [{ id: 11, displayName: 'Мария Иванова' }],
+          },
+          {
+            startsAt: ivanStartsAt.toISOString(),
+            endsAt: new Date(ivanStartsAt.getTime() + 30 * 60_000).toISOString(),
+            staffIds: [12],
+            staff: [{ id: 12, displayName: 'Иван Петров' }],
+          },
+        ],
+      },
+    ])
+
+    renderApp('/salons/7/book?serviceId=15')
+    await selectAvailableDate(user, mariaSlot.date)
+    expect(await screen.findByRole('button', { name: '10:00' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '11:00' })).toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole('radio', { name: 'Покажи графика на Иван Петров' }),
+    )
+
+    expect(screen.getByText('Избрана дата')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '10:00' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '11:00' })).toBeInTheDocument()
   })
 })

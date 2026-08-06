@@ -6,6 +6,7 @@
 
 | # | Бранч | Обобщение |
 |---|-------|-----------|
+| 17 | feature/warm-liquid-action-buttons | Liquid Glass actions и service states; компактен свързан booking panel с предварителен филтър по служител и динамични свободни дати/часове. |
 | 16 | feature/booking-staff-selection | Booking UI показва свободните служители за избрания час и изисква точно един; единственият наличен се избира автоматично. |
 | 15 | feature/staff-onboarding-ui | Добави служител: табове „Създай“ (нов CAS STAFF) / „Съществуващ“ (email). `POST .../staff/create`. |
 | 14 | feature/working-days-liquid-ui | Работно време при нов обект: Liquid Glass list + switches + pill часове + presets. |
