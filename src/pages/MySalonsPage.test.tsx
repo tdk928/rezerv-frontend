@@ -5,7 +5,13 @@ import { renderApp } from '../test/renderApp'
 import { makeAuthResponse, makeCategories } from '../test/fixtures'
 import * as authApi from '../api/auth'
 import { getCategories } from '../api/business'
-import { createSalonService, listMyCompanies, removeSalonService } from '../api/businessOnboarding'
+import {
+  createSalonService,
+  listMyCompanies,
+  listSalonStaff,
+  removeSalonService,
+  replaceStaffServices,
+} from '../api/businessOnboarding'
 
 vi.mock('../api/auth', { spy: true })
 vi.mock('../api/business', () => ({
@@ -21,6 +27,8 @@ vi.mock('../api/businessOnboarding', () => ({
   createSalon: vi.fn(),
   createSalonService: vi.fn(),
   removeSalonService: vi.fn(),
+  listSalonStaff: vi.fn(),
+  replaceStaffServices: vi.fn(),
 }))
 
 const REFRESH_TOKEN_KEY = 'rezerv.refreshToken'
@@ -30,6 +38,7 @@ describe('MySalonsPage', () => {
     vi.clearAllMocks()
     sessionStorage.clear()
     vi.mocked(getCategories).mockResolvedValue(makeCategories())
+    vi.mocked(listSalonStaff).mockResolvedValue([])
   })
 
   it('показва само обекти от одобрени фирми', async () => {
@@ -271,6 +280,93 @@ describe('MySalonsPage', () => {
 
     await waitFor(() => {
       expect(removeSalonService).toHaveBeenCalledWith(expect.any(String), 1, 9)
+    })
+  })
+
+  it('маркира премахването в червено и връща услугата в неутрално след запис', async () => {
+    const user = userEvent.setup()
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, 'refresh-token')
+    vi.mocked(authApi.refresh).mockResolvedValue(
+      makeAuthResponse({
+        user: {
+          ...makeAuthResponse().user,
+          companyId: 10,
+          companyIds: [10],
+          roles: ['BUSINESS_OWNER', 'CLIENT'],
+        },
+      }),
+    )
+    vi.mocked(listMyCompanies).mockResolvedValue([
+      {
+        id: 10,
+        eik: '131529327',
+        name: 'Одобрена ООД',
+        legalName: 'Approved OOD',
+        email: 'ok@test.bg',
+        phone: '+359888',
+        ownerUserId: 1,
+        status: 'APPROVED',
+        createdAt: '2026-07-17T00:00:00Z',
+        salons: [
+          {
+            id: 1,
+            companyId: 10,
+            name: 'Салон Център',
+            description: null,
+            city: { id: 1, name: 'София', slug: 'sofia' },
+            address: 'ул. Витоша 1',
+            lat: null,
+            lng: null,
+            email: 'salon@test.bg',
+            phone: '+359111',
+            status: 'ACTIVE',
+            services: [
+              {
+                id: 9,
+                salonId: 1,
+                categoryId: 1,
+                categoryName: 'Масаж',
+                name: 'Релакс масаж',
+                durationMin: 60,
+                price: 50,
+                active: true,
+              },
+            ],
+          },
+        ],
+      },
+    ])
+    const member = {
+      id: 7,
+      salonId: 1,
+      userId: 21,
+      displayName: 'Мария',
+      title: 'Масажист',
+      active: true,
+      serviceIds: [9],
+      workingHours: [],
+    }
+    vi.mocked(listSalonStaff)
+      .mockResolvedValueOnce([member])
+      .mockResolvedValue([{ ...member, serviceIds: [] }])
+    vi.mocked(replaceStaffServices).mockResolvedValue({ ...member, serviceIds: [] })
+
+    renderApp('/business/salons')
+    const serviceToggle = await screen.findByRole('checkbox', { name: /Релакс масаж/ })
+    const saveButton = screen.getByRole('button', { name: 'Запази услуги' })
+    expect(serviceToggle).toHaveClass('bg-success')
+    expect(saveButton).toBeDisabled()
+
+    await user.click(serviceToggle)
+    expect(serviceToggle).toHaveClass('bg-danger')
+    expect(saveButton).toBeEnabled()
+
+    await user.click(saveButton)
+
+    await waitFor(() => {
+      expect(replaceStaffServices).toHaveBeenCalledWith(expect.any(String), 7, [])
+      expect(serviceToggle).not.toHaveClass('bg-danger')
+      expect(saveButton).toBeDisabled()
     })
   })
 })

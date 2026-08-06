@@ -328,7 +328,7 @@ function StaffSection({
 
       {!showForm ? (
         <p className="mb-3 text-xs text-ink-muted">
-          Създайте нов акаунт или свържете съществуващ — служителят получава роля STAFF за фирмата.
+          Създайте нов акаунт или свържете съществуващ.
         </p>
       ) : null}
 
@@ -565,13 +565,28 @@ function StaffRow({
 }) {
   const queryClient = useQueryClient()
   const [selected, setSelected] = useState<number[]>(member.serviceIds)
+  const hasServiceChanges =
+    selected.length !== member.serviceIds.length ||
+    selected.some((id) => !member.serviceIds.includes(id))
 
   const saveServices = useMutation({
     mutationFn: () => replaceStaffServices(accessToken, member.id, selected),
-    onSuccess: async () => {
+    onSuccess: async (savedMember) => {
+      queryClient.setQueryData<StaffMemberResponse[]>(
+        ['salon-staff', salonId],
+        (current) =>
+          current?.map((item) => (item.id === savedMember.id ? savedMember : item)),
+      )
       await queryClient.invalidateQueries({ queryKey: ['salon-staff', salonId] })
     },
   })
+
+  function toggleService(serviceId: number) {
+    saveServices.reset()
+    setSelected((prev) =>
+      prev.includes(serviceId) ? prev.filter((id) => id !== serviceId) : [...prev, serviceId],
+    )
+  }
 
   return (
     <li className="rounded-2xl bg-white/45 px-3 py-3">
@@ -589,35 +604,84 @@ function StaffRow({
 
       {services.length > 0 ? (
         <div className="mt-3">
-          <p className="mb-2 text-xs font-medium text-ink-secondary">Услуги, които извършва</p>
-          <ul className="flex flex-col gap-1.5">
+          <p className="mb-2.5 text-xs font-medium text-ink-secondary">Услуги, които извършва</p>
+          <ul className="flex flex-wrap gap-2">
             {services.map((service) => {
               const checked = selected.includes(service.id)
+              const pendingRemoval = member.serviceIds.includes(service.id) && !checked
               return (
                 <li key={service.id}>
-                  <label className="flex items-center gap-2 text-sm text-ink">
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() =>
-                        setSelected((prev) =>
-                          checked ? prev.filter((id) => id !== service.id) : [...prev, service.id],
-                        )
-                      }
-                    />
-                    {service.name}
-                  </label>
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={checked}
+                    onClick={() => toggleService(service.id)}
+                    className={[
+                      'inline-flex items-center gap-2.5 rounded-full px-3.5 py-2 text-left transition-all duration-200',
+                      checked
+                        ? 'bg-success text-white shadow-sm shadow-success/30'
+                        : pendingRemoval
+                          ? 'bg-danger text-white shadow-sm shadow-danger/30'
+                        : 'border border-black/[0.06] bg-white/65 text-ink hover:bg-white/90',
+                    ].join(' ')}
+                  >
+                    <span
+                      aria-hidden
+                      className={[
+                        'flex size-5 shrink-0 items-center justify-center rounded-full transition-colors',
+                        checked || pendingRemoval
+                          ? 'bg-white/25'
+                          : 'border border-black/15 bg-white/80',
+                      ].join(' ')}
+                    >
+                      {checked ? (
+                        <svg viewBox="0 0 12 12" className="size-3" fill="none">
+                          <path
+                            d="M2.5 6.2 4.8 8.5 9.5 3.5"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      ) : pendingRemoval ? (
+                        <svg viewBox="0 0 12 12" className="size-3" fill="none">
+                          <path
+                            d="m3.25 3.25 5.5 5.5m0-5.5-5.5 5.5"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      ) : null}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold leading-tight">{service.name}</span>
+                      <span
+                        className={[
+                          'mt-0.5 block text-xs tabular-nums',
+                          checked || pendingRemoval ? 'text-white/75' : 'text-ink-muted',
+                        ].join(' ')}
+                      >
+                        {service.durationMin} мин · {formatEuro(service.price)} €
+                      </span>
+                    </span>
+                  </button>
                 </li>
               )
             })}
           </ul>
           <Button
             type="button"
-            className="mt-2"
-            disabled={saveServices.isPending}
+            className="mt-3"
+            disabled={saveServices.isPending || !hasServiceChanges}
             onClick={() => saveServices.mutate()}
           >
-            {saveServices.isPending ? 'Запазване…' : 'Запази услуги'}
+            {saveServices.isPending
+              ? 'Запазване…'
+              : saveServices.isSuccess
+                ? 'Запазено ✓'
+                : 'Запази услуги'}
           </Button>
           {saveServices.error ? (
             <p className="mt-2 text-sm text-danger">{serverErrorMessage(saveServices.error)}</p>
