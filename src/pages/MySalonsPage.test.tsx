@@ -191,7 +191,7 @@ describe('MySalonsPage', () => {
     renderApp('/business/salons')
     await screen.findByText('Салон Център')
 
-    await user.click(screen.getByRole('button', { name: '+ Добави услуга' }))
+    await user.click(screen.getByRole('button', { name: 'Добави услуга' }))
     await user.type(screen.getByLabelText('Име на услугата'), 'Класически масаж')
     await user.selectOptions(screen.getByLabelText('Категория'), '1')
     await user.type(screen.getByLabelText('Времетраене (мин)'), '45')
@@ -354,18 +354,18 @@ describe('MySalonsPage', () => {
     renderApp('/business/salons')
     const serviceToggle = await screen.findByRole('checkbox', { name: /Релакс масаж/ })
     const saveButton = screen.getByRole('button', { name: 'Запази услуги' })
-    expect(serviceToggle).toHaveClass('bg-success')
+    expect(serviceToggle).toHaveClass('bg-success/[0.10]')
     expect(saveButton).toBeDisabled()
 
     await user.click(serviceToggle)
-    expect(serviceToggle).toHaveClass('bg-danger')
+    expect(serviceToggle).toHaveClass('bg-danger/[0.07]')
     expect(saveButton).toBeEnabled()
 
     await user.click(saveButton)
 
     await waitFor(() => {
       expect(replaceStaffServices).toHaveBeenCalledWith(expect.any(String), 7, [])
-      expect(serviceToggle).not.toHaveClass('bg-danger')
+      expect(serviceToggle).not.toHaveClass('bg-danger/[0.07]')
       expect(saveButton).toBeDisabled()
     })
   })
